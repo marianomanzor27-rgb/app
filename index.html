@@ -2,804 +2,737 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NutriVida — Recetas para Celíacas y Diabéticas</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NutriVida — Tu plan personalizado</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --verde: #1a9e6e;
-    --verde-dark: #0d6e4a;
-    --verde-light: #e8f7f1;
-    --verde-mid: #b2e4cf;
-    --amarillo: #f5c842;
-    --fondo: #f7f9f7;
-    --blanco: #ffffff;
-    --texto: #1a1e1a;
-    --texto-suave: #5a6b5a;
-    --borde: #dce8dc;
-    --rojo: #e05252;
-    --naranja: #f0893a;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--fondo); color: var(--texto); }
-
-  /* LAYOUT */
-  .app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--blanco); position: relative; display: flex; flex-direction: column; }
-  .screen { display: none; flex-direction: column; flex: 1; }
-  .screen.active { display: flex; }
-
-  /* NAV BOTTOM */
-  .nav-bottom {
-    position: sticky; bottom: 0; background: var(--blanco);
-    border-top: 1px solid var(--borde);
-    display: flex; padding: 8px 0 16px;
-    z-index: 100;
-  }
-  .nav-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    background: none; border: none; cursor: pointer; padding: 4px 0;
-    color: var(--texto-suave); font-size: 10px; font-family: 'DM Sans', sans-serif;
-    transition: color 0.2s;
-  }
-  .nav-btn.active { color: var(--verde); }
-  .nav-btn svg { width: 22px; height: 22px; }
-
-  /* ONBOARDING */
-  #screen-onboarding { background: var(--blanco); }
-  .onb-hero {
-    background: var(--verde);
-    padding: 48px 28px 36px;
-    text-align: center;
-  }
-  .onb-logo {
-    width: 72px; height: 72px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px;
-    font-size: 36px;
-  }
-  .onb-hero h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: #fff; margin-bottom: 8px; }
-  .onb-hero p { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; }
-  .onb-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
-  .onb-badge { background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; padding: 4px 12px; border-radius: 20px; }
-
-  .onb-body { padding: 28px 24px; flex: 1; overflow-y: auto; }
-  .onb-body h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
-
-  .step { display: none; }
-  .step.active { display: block; }
-
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 13px; color: var(--texto-suave); margin-bottom: 8px; font-weight: 500; }
-  .field input {
-    width: 100%; padding: 12px 14px; border: 1.5px solid var(--borde);
-    border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif;
-    background: var(--fondo); outline: none; transition: border 0.2s;
-  }
-  .field input:focus { border-color: var(--verde); }
-
-  .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .option-card {
-    border: 1.5px solid var(--borde); border-radius: 14px; padding: 14px 12px;
-    cursor: pointer; text-align: center; transition: all 0.2s; background: var(--blanco);
-  }
-  .option-card.selected { border-color: var(--verde); background: var(--verde-light); }
-  .option-card .oc-icon { font-size: 24px; margin-bottom: 6px; }
-  .option-card .oc-label { font-size: 13px; font-weight: 500; }
-  .option-card .oc-sub { font-size: 11px; color: var(--texto-suave); margin-top: 2px; }
-
-  .btn-primary {
-    width: 100%; padding: 15px; background: var(--verde); color: #fff;
-    border: none; border-radius: 14px; font-size: 15px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px;
-    transition: background 0.2s;
-  }
-  .btn-primary:hover { background: var(--verde-dark); }
-  .btn-sec {
-    width: 100%; padding: 13px; background: transparent; color: var(--texto-suave);
-    border: 1.5px solid var(--borde); border-radius: 14px; font-size: 14px;
-    font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px;
-  }
-
-  /* HOME */
-  #screen-home { overflow-y: auto; }
-  .home-header {
-    padding: 24px 20px 16px;
-    display: flex; justify-content: space-between; align-items: flex-start;
-  }
-  .home-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; }
-  .home-header p { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
-  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--verde); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 16px; flex-shrink: 0; }
-
-  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
-  .stat-card { background: var(--fondo); border-radius: 14px; padding: 12px; text-align: center; }
-  .stat-card .sc-num { font-size: 20px; font-weight: 600; color: var(--verde); }
-  .stat-card .sc-label { font-size: 11px; color: var(--texto-suave); margin-top: 2px; }
-
-  .section-title { padding: 0 20px 12px; font-size: 15px; font-weight: 600; }
-
-  .hoy-card {
-    margin: 0 20px 20px;
-    background: var(--verde);
-    border-radius: 18px;
-    padding: 18px 20px;
-    color: #fff;
-  }
-  .hoy-card .hc-label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
-  .hoy-card .hc-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
-  .hoy-card .hc-row { display: flex; gap: 12px; flex-wrap: wrap; }
-  .hoy-card .hc-tag { background: rgba(255,255,255,0.2); font-size: 11px; padding: 4px 10px; border-radius: 20px; }
-
-  .recetas-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px 20px; scrollbar-width: none; }
-  .recetas-scroll::-webkit-scrollbar { display: none; }
-  .mini-card {
-    flex-shrink: 0; width: 150px; background: var(--fondo); border-radius: 16px; overflow: hidden; cursor: pointer;
-    transition: transform 0.15s;
-  }
-  .mini-card:hover { transform: translateY(-2px); }
-  .mini-card .mc-emoji { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 48px; background: var(--verde-light); }
-  .mini-card .mc-body { padding: 10px; }
-  .mini-card .mc-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
-  .mini-card .mc-tag { font-size: 11px; color: var(--texto-suave); margin-top: 4px; }
-
-  /* RECETAS */
-  #screen-recetas { overflow-y: auto; }
-  .recetas-header { padding: 24px 20px 16px; }
-  .recetas-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 14px; }
-
-  .filtros { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
-  .filtros::-webkit-scrollbar { display: none; }
-  .filtro-btn {
-    flex-shrink: 0; padding: 7px 14px; border-radius: 20px; font-size: 13px;
-    border: 1.5px solid var(--borde); background: var(--blanco); cursor: pointer;
-    font-family: 'DM Sans', sans-serif; color: var(--texto-suave); transition: all 0.2s;
-  }
-  .filtro-btn.active { background: var(--verde); border-color: var(--verde); color: #fff; }
-
-  .receta-lista { padding: 8px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
-  .receta-item {
-    display: flex; gap: 14px; align-items: center;
-    background: var(--fondo); border-radius: 16px; padding: 14px;
-    cursor: pointer; transition: background 0.15s;
-  }
-  .receta-item:hover { background: var(--verde-light); }
-  .receta-emoji { font-size: 36px; width: 56px; height: 56px; background: var(--blanco); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .receta-info { flex: 1; }
-  .receta-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .receta-info p { font-size: 12px; color: var(--texto-suave); }
-  .receta-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-  .tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
-  .tag-verde { background: var(--verde-light); color: var(--verde-dark); }
-  .tag-naranja { background: #fef0e6; color: #c05a10; }
-  .tag-azul { background: #e8f0fe; color: #1a5cb0; }
-
-  /* DETALLE RECETA */
-  #screen-detalle { overflow-y: auto; }
-  .det-header { position: relative; }
-  .det-emoji-bg { background: var(--verde-light); height: 160px; display: flex; align-items: center; justify-content: center; font-size: 80px; }
-  .det-back {
-    position: absolute; top: 16px; left: 16px;
-    width: 36px; height: 36px; background: rgba(255,255,255,0.9);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; border: none; font-size: 18px;
-  }
-  .det-body { padding: 20px; }
-  .det-body h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
-  .det-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-  .det-nums { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
-  .det-num { background: var(--fondo); border-radius: 12px; padding: 12px; text-align: center; }
-  .det-num .dn-val { font-size: 18px; font-weight: 600; color: var(--verde); }
-  .det-num .dn-label { font-size: 11px; color: var(--texto-suave); }
-  .det-section { margin-bottom: 20px; }
-  .det-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
-  .ingr-list { list-style: none; }
-  .ingr-list li { padding: 8px 0; border-bottom: 1px solid var(--borde); font-size: 14px; display: flex; justify-content: space-between; }
-  .ingr-list li:last-child { border-bottom: none; }
-  .ingr-list li span { color: var(--texto-suave); font-size: 13px; }
-  .paso { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
-  .paso-num { width: 28px; height: 28px; background: var(--verde); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
-  .paso p { font-size: 14px; line-height: 1.6; color: var(--texto); }
-
-  /* MENU */
-  #screen-menu { overflow-y: auto; }
-  .menu-header { padding: 24px 20px 16px; }
-  .menu-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
-  .menu-header p { font-size: 13px; color: var(--texto-suave); }
-  .dia-card { margin: 0 20px 14px; border: 1.5px solid var(--borde); border-radius: 16px; overflow: hidden; }
-  .dia-header { background: var(--fondo); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-  .dia-header h3 { font-size: 14px; font-weight: 600; }
-  .dia-header span { font-size: 12px; color: var(--texto-suave); }
-  .dia-body { padding: 12px 16px; border-top: 1px solid var(--borde); }
-  .comida-row { display: flex; gap: 10px; align-items: center; padding: 6px 0; }
-  .comida-emoji { font-size: 20px; width: 32px; text-align: center; }
-  .comida-info { flex: 1; }
-  .comida-info .ci-tipo { font-size: 11px; color: var(--texto-suave); }
-  .comida-info .ci-nom { font-size: 13px; font-weight: 500; }
-  .compras-btn {
-    margin: 4px 20px 20px; padding: 14px; background: var(--verde-light); color: var(--verde-dark);
-    border: 1.5px solid var(--verde-mid); border-radius: 14px; font-size: 14px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-
-  /* CALCULADORA */
-  #screen-calc { overflow-y: auto; }
-  .calc-header { padding: 24px 20px 16px; }
-  .calc-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; }
-  .calc-body { padding: 0 20px 20px; }
-  .slider-field { margin-bottom: 20px; }
-  .slider-field label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
-  .slider-field label span { color: var(--verde); font-weight: 600; }
-  input[type=range] {
-    width: 100%; -webkit-appearance: none; height: 6px;
-    background: var(--borde); border-radius: 3px; outline: none;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 22px; height: 22px;
-    background: var(--verde); border-radius: 50%; cursor: pointer;
-  }
-  .result-big { background: var(--verde); color: #fff; border-radius: 18px; padding: 24px; text-align: center; margin-bottom: 20px; }
-  .result-big .rb-num { font-size: 42px; font-weight: 700; }
-  .result-big .rb-label { font-size: 14px; opacity: 0.85; margin-top: 4px; }
-  .macros-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-  .macro-card { background: var(--fondo); border-radius: 12px; padding: 12px; text-align: center; }
-  .macro-card .mv { font-size: 16px; font-weight: 600; }
-  .macro-card .ml { font-size: 11px; color: var(--texto-suave); margin-top: 2px; }
-  .macro-card.mc-prot .mv { color: #e05252; }
-  .macro-card.mc-carb .mv { color: #f0893a; }
-  .macro-card.mc-gras .mv { color: #1a9e6e; }
-
-  /* SEGUIMIENTO */
-  #screen-seguimiento { overflow-y: auto; }
-  .seg-header { padding: 24px 20px 16px; }
-  .seg-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
-  .seg-header p { font-size: 13px; color: var(--texto-suave); }
-  .seg-body { padding: 0 20px 20px; }
-  .registro-form { background: var(--fondo); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
-  .registro-form h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
-  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .input-group { display: flex; flex-direction: column; gap: 6px; }
-  .input-group label { font-size: 12px; color: var(--texto-suave); }
-  .input-group input {
-    padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 10px;
-    font-size: 15px; font-family: 'DM Sans', sans-serif; background: var(--blanco); outline: none;
-  }
-  .input-group input:focus { border-color: var(--verde); }
-  .btn-guardar {
-    width: 100%; padding: 12px; background: var(--verde); color: #fff;
-    border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
-    font-family: 'DM Sans', sans-serif; cursor: pointer;
-  }
-  .registros-lista { }
-  .registros-lista h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
-  .reg-item { background: var(--fondo); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-  .reg-item .ri-fecha { font-size: 12px; color: var(--texto-suave); }
-  .reg-item .ri-vals { display: flex; gap: 16px; }
-  .reg-val { text-align: center; }
-  .reg-val .rv-num { font-size: 15px; font-weight: 600; }
-  .reg-val .rv-label { font-size: 10px; color: var(--texto-suave); }
-  .rv-num.bueno { color: var(--verde); }
-  .rv-num.medio { color: var(--naranja); }
-  .rv-num.malo { color: var(--rojo); }
-
-  .chart-container { background: var(--fondo); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
-  .chart-container h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
-  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
-  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-  .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
-  .bar-label { font-size: 9px; color: var(--texto-suave); }
-
-  /* TOAST */
-  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--texto); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+:root{--g1:#0a6e4a;--g2:#12a06e;--g3:#1dc98a;--g4:#e8faf3;--g5:#c6f0e0;--acc:#f5a623;--acc2:#e8445a;--dark:#0d1f1a;--dark2:#1a2e28;--bg:#f4f8f6;--white:#ffffff;--borde:#e0ede8;--text:#0d1f1a;--text2:#4a6b5e;--text3:#8aab9c;--sh:0 4px 24px rgba(10,110,74,0.10);--sh2:0 2px 12px rgba(10,110,74,0.08);--r:20px;--rs:12px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:#d8e8df;color:var(--text);overflow:hidden;}
+.app{max-width:430px;margin:0 auto;height:100vh;background:var(--bg);position:relative;display:flex;flex-direction:column;overflow:hidden;}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;}
+.screen.active{display:flex;}
+#sc-splash{background:linear-gradient(160deg,#0a3d28 0%,#0d6e4a 50%,#1dc98a 100%);align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.sp-bg span{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,0.07);}
+.sp-bg span:nth-child(1){width:320px;height:320px;top:-100px;right:-100px;}
+.sp-bg span:nth-child(2){width:220px;height:220px;bottom:80px;left:-70px;}
+.sp-bg span:nth-child(3){width:160px;height:160px;bottom:-50px;right:30px;}
+.sp-inner{position:relative;z-index:1;text-align:center;padding:40px 32px;}
+.sp-logo{width:88px;height:88px;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;font-size:44px;border:1px solid rgba(255,255,255,0.2);}
+.sp-inner h1{font-family:'Playfair Display',serif;font-size:34px;color:#fff;margin-bottom:8px;}
+.sp-inner p{font-size:15px;color:rgba(255,255,255,0.75);line-height:1.7;margin-bottom:36px;}
+.sp-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:36px;}
+.sp-badge{background:rgba(255,255,255,0.15);color:#fff;font-size:12px;padding:6px 14px;border-radius:30px;border:1px solid rgba(255,255,255,0.2);font-weight:500;}
+.btn-main{background:#fff;color:var(--g1);border:none;padding:17px 40px;border-radius:50px;font-size:16px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;width:100%;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.2);transition:transform 0.15s;}
+.btn-main:active{transform:scale(0.97);}
+.sp-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:14px;}
+#sc-onb{background:var(--white);overflow-y:auto;}
+.onb-bar-wrap{height:4px;background:var(--borde);}
+.onb-bar{height:100%;background:linear-gradient(90deg,var(--g1),var(--g3));transition:width 0.4s ease;border-radius:4px;}
+.onb-body{padding:28px 24px 48px;}
+.onb-step{display:none;}
+.onb-step.on{display:block;}
+.step-lbl{font-size:11px;font-weight:700;color:var(--g2);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px;}
+.onb-body h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:6px;line-height:1.3;}
+.onb-body .sub{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:13px;color:var(--text2);margin-bottom:7px;font-weight:600;}
+.field input,.field select{width:100%;padding:14px 16px;border:2px solid var(--borde);border-radius:var(--rs);font-size:16px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);outline:none;transition:border 0.2s;color:var(--text);}
+.field input:focus{border-color:var(--g2);background:#fff;}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:22px;}
+.og.og3{grid-template-columns:1fr 1fr 1fr;}
+.oc{border:2px solid var(--borde);border-radius:var(--r);padding:15px 10px;cursor:pointer;text-align:center;transition:all 0.2s;background:var(--white);position:relative;}
+.oc.sel{border-color:var(--g2);background:var(--g4);}
+.oc .chk{position:absolute;top:8px;right:8px;width:18px;height:18px;background:var(--g2);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;font-size:10px;color:#fff;transition:opacity 0.2s;}
+.oc.sel .chk{opacity:1;}
+.oc .oi{font-size:26px;margin-bottom:7px;}
+.oc .ol{font-size:12px;font-weight:600;color:var(--dark);line-height:1.3;}
+.oc .os{font-size:11px;color:var(--text2);margin-top:3px;}
+.btn-sig{width:100%;padding:16px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 6px 24px rgba(10,110,74,0.3);transition:transform 0.15s;margin-top:4px;}
+.btn-sig:active{transform:scale(0.97);}
+.btn-volver{width:100%;padding:13px;background:transparent;color:var(--text2);border:2px solid var(--borde);border-radius:50px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;margin-top:10px;}
+.nav{position:sticky;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--borde);display:flex;padding:8px 0 18px;z-index:100;}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;color:var(--text3);font-size:10px;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif;transition:color 0.2s;letter-spacing:0.3px;}
+.nb.on{color:var(--g1);}
+.nb svg{width:22px;height:22px;}
+#sc-home{overflow-y:auto;}
+.h-top{padding:26px 20px 0;display:flex;justify-content:space-between;align-items:flex-start;}
+.h-top h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--dark);}
+.h-top p{font-size:13px;color:var(--text2);margin-top:2px;}
+.av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g3));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:17px;flex-shrink:0;}
+.plan-banner{margin:16px 20px 0;background:linear-gradient(135deg,var(--dark),var(--dark2));border-radius:22px;padding:20px;position:relative;overflow:hidden;}
+.plan-banner::before{content:'🎯';position:absolute;right:-8px;bottom:-12px;font-size:80px;opacity:0.1;}
+.pb-tag{background:var(--g3);color:var(--dark);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.pb-title{font-family:'Playfair Display',serif;font-size:19px;color:#fff;margin-bottom:6px;line-height:1.3;}
+.pb-meta{font-size:13px;color:rgba(255,255,255,0.65);}
+.stats-row{display:flex;gap:10px;padding:16px 20px 0;overflow-x:auto;scrollbar-width:none;}
+.stats-row::-webkit-scrollbar{display:none;}
+.stat-p{flex-shrink:0;background:var(--white);border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh2);border:1px solid var(--borde);}
+.stat-p .si{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.sig{background:var(--g4);}.sia{background:#fff8e6;}.sir{background:#fff0f2;}
+.stat-p .sn{font-size:17px;font-weight:700;color:var(--dark);}
+.stat-p .sl{font-size:11px;color:var(--text2);}
+.sec-h{display:flex;justify-content:space-between;align-items:center;padding:22px 20px 12px;}
+.sec-h h3{font-size:16px;font-weight:700;color:var(--dark);}
+.sec-h a{font-size:13px;color:var(--g2);font-weight:600;cursor:pointer;}
+.hoy-hero{margin:0 20px;background:linear-gradient(135deg,#0a3d28,#0d6e4a);border-radius:22px;padding:20px;position:relative;overflow:hidden;}
+.hh-tag{background:var(--g3);color:var(--dark);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:10px;position:relative;z-index:1;}
+.hh-title{font-family:'Playfair Display',serif;font-size:20px;color:#fff;margin-bottom:8px;line-height:1.3;position:relative;z-index:1;}
+.hh-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;position:relative;z-index:1;}
+.hh-chip{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);font-size:12px;padding:5px 11px;border-radius:20px;}
+.btn-ver{background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;border:none;padding:11px 20px;border-radius:28px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;position:relative;z-index:1;}
+.rscroll{display:flex;gap:12px;overflow-x:auto;padding:0 20px 20px;scrollbar-width:none;}
+.rscroll::-webkit-scrollbar{display:none;}
+.rc{flex-shrink:0;width:155px;background:var(--white);border-radius:18px;overflow:hidden;cursor:pointer;box-shadow:var(--sh2);border:1px solid var(--borde);transition:transform 0.2s;}
+.rc:active{transform:scale(0.97);}
+.rc-img{height:95px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+.rcv{background:linear-gradient(135deg,#e8faf3,#c6f0e0);}
+.rca{background:linear-gradient(135deg,#fff8e6,#ffe9a0);}
+.rcp{background:linear-gradient(135deg,#fff0f5,#ffd6e7);}
+.rcb{background:linear-gradient(135deg,#f0f4ff,#d6e4ff);}
+.rc-kcal{position:absolute;top:7px;right:7px;background:rgba(255,255,255,0.92);font-size:10px;font-weight:700;color:var(--g1);padding:3px 7px;border-radius:9px;}
+.rc-body{padding:10px 12px;}
+.rc-name{font-size:13px;font-weight:600;color:var(--dark);line-height:1.3;margin-bottom:3px;}
+.rc-meta{font-size:11px;color:var(--text2);}
+.tip-c{margin:0 20px 24px;background:linear-gradient(135deg,#fff8e6,#fff3d0);border-radius:18px;padding:16px;display:flex;gap:12px;border:1px solid #f5d98a;}
+.tip-lbl{font-size:11px;font-weight:700;color:var(--acc);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:3px;}
+.tip-txt{font-size:13px;color:#5a4a00;line-height:1.6;}
+#sc-rec{overflow-y:auto;}
+.rh{padding:26px 20px 14px;}
+.rh h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:14px;}
+.search-w{position:relative;margin-bottom:14px;}
+.search-w input{width:100%;padding:13px 16px 13px 42px;border:2px solid var(--borde);border-radius:50px;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--white);outline:none;transition:border 0.2s;color:var(--text);}
+.search-w input:focus{border-color:var(--g2);}
+.search-w span{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--text3);}
+.ftabs{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.ftabs::-webkit-scrollbar{display:none;}
+.ft{flex-shrink:0;padding:8px 15px;border-radius:30px;font-size:13px;font-weight:600;border:2px solid var(--borde);background:var(--white);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text2);transition:all 0.2s;}
+.ft.on{background:var(--dark);border-color:var(--dark);color:#fff;}
+.rlista{padding:6px 20px 20px;display:flex;flex-direction:column;gap:11px;}
+.ri{display:flex;gap:13px;align-items:center;background:var(--white);border-radius:18px;padding:13px;cursor:pointer;border:1px solid var(--borde);box-shadow:var(--sh2);transition:transform 0.15s;}
+.ri:active{transform:scale(0.98);}
+.ri-em{width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;}
+.ri-info{flex:1;min-width:0;}
+.ri-info h3{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:3px;line-height:1.3;}
+.ri-meta{font-size:12px;color:var(--text2);margin-bottom:5px;}
+.tags{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{font-size:10px;padding:3px 8px;border-radius:9px;font-weight:600;}
+.tg{background:var(--g4);color:var(--g1);}
+.to{background:#fff8e6;color:#8a5a00;}
+.tb{background:#f0f4ff;color:#2a4a9a);}
+.ri-arr{font-size:18px;color:var(--text3);flex-shrink:0;}
+.kcal-badge{background:var(--dark);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:9px;}
+#sc-det{overflow-y:auto;}
+.det-hero{height:190px;display:flex;align-items:center;justify-content:center;font-size:88px;position:relative;}
+.det-back{position:absolute;top:16px;left:16px;width:40px;height:40px;background:rgba(255,255,255,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;font-size:20px;cursor:pointer;box-shadow:var(--sh2);}
+.det-fav{position:absolute;top:16px;right:16px;width:40px;height:40px;background:rgba(255,255,255,0.95);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;font-size:20px;cursor:pointer;box-shadow:var(--sh2);}
+.det-bd{background:var(--white);border-radius:26px 26px 0 0;margin-top:-18px;padding:22px 20px 40px;}
+.det-bd h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--dark);margin-bottom:8px;line-height:1.3;}
+.ig-b{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:12px;font-size:13px;font-weight:600;margin-bottom:14px;}
+.igb{background:#e8faf3;color:var(--g1);}.igm{background:#fff8e6;color:#8a5a00;}.iga{background:#fff0f2;color:#9a2a2a;}
+.det-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:20px;}
+.dnum{background:var(--bg);border-radius:14px;padding:13px;text-align:center;}
+.dv{font-size:18px;font-weight:700;color:var(--g1);}
+.dl{font-size:11px;color:var(--text2);font-weight:500;margin-top:2px;}
+.det-sec{margin-bottom:20px;}
+.det-sec h3{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:11px;}
+.ing-l{list-style:none;}
+.ing-l li{padding:9px 0;border-bottom:1px solid var(--borde);font-size:14px;display:flex;justify-content:space-between;align-items:center;}
+.ing-l li:last-child{border-bottom:none;}
+.iq{font-size:13px;color:var(--text2);font-weight:600;background:var(--bg);padding:3px 9px;border-radius:7px;}
+.paso{display:flex;gap:13px;margin-bottom:14px;align-items:flex-start;}
+.pn{width:30px;height:30px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.paso p{font-size:14px;line-height:1.7;padding-top:4px;}
+.cals-note{background:var(--g4);border-radius:14px;padding:14px;border:1px solid var(--g5);font-size:13px;color:var(--g1);line-height:1.6;margin-bottom:16px;}
+#sc-menu{overflow-y:auto;}
+.mh{padding:26px 20px 18px;}
+.mh h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:4px;}
+.mh p{font-size:13px;color:var(--text2);}
+.dia-c{margin:0 20px 12px;background:var(--white);border-radius:18px;overflow:hidden;box-shadow:var(--sh2);border:1px solid var(--borde);}
+.dt{padding:13px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+.dt.hoy{background:linear-gradient(135deg,var(--dark),var(--dark2));}
+.dt.hoy .dtd{color:#fff;}
+.dt.hoy .dtc{color:var(--g3);}
+.dtd{font-size:15px;font-weight:700;color:var(--dark);}
+.dtc{font-size:12px;color:var(--text2);}
+.drows{padding:6px 16px 12px;display:none;border-top:1px solid var(--borde);}
+.drows.op{display:block;}
+.crow{display:flex;gap:11px;align-items:center;padding:7px 0;border-bottom:1px solid var(--borde);cursor:pointer;}
+.crow:last-child{border-bottom:none;}
+.cr-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.cr-tipo{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+.cr-nom{font-size:13px;font-weight:600;color:var(--dark);}
+.cr-kcal{font-size:11px;color:var(--g2);font-weight:600;}
+.compras-btn{margin:4px 20px 24px;width:calc(100% - 40px);padding:15px;background:var(--g4);color:var(--g1);border:2px solid var(--g5);border-radius:50px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;display:none;align-items:flex-end;}
+.mo.op{display:flex;}
+.mb{background:var(--white);border-radius:26px 26px 0 0;width:100%;max-height:82vh;overflow-y:auto;padding:26px 22px 40px;}
+.mh2{width:38px;height:4px;background:var(--borde);border-radius:2px;margin:0 auto 18px;}
+.mb h3{font-family:'Playfair Display',serif;font-size:20px;color:var(--dark);margin-bottom:4px;}
+.mb .ms{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.ccat{margin-bottom:14px;}
+.ccat h4{font-size:11px;font-weight:700;color:var(--g1);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+.ci{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--borde);cursor:pointer;}
+.ci:last-child{border-bottom:none;}
+.ci-cb{width:22px;height:22px;border-radius:6px;border:2px solid var(--borde);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:12px;}
+.ci-cb.dk{background:var(--g2);border-color:var(--g2);color:#fff;}
+.ci-nm{font-size:14px;color:var(--text);transition:color 0.2s;}
+.ci-nm.dk{color:var(--text3);text-decoration:line-through;}
+.mc-close{width:100%;padding:14px;background:var(--dark);color:#fff;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;margin-top:18px;}
+#sc-sal{overflow-y:auto;}
+.sh{padding:26px 20px 18px;}
+.sh h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark);margin-bottom:4px;}
+.sh p{font-size:13px;color:var(--text2);}
+.sb{padding:0 20px 20px;}
+.rc2{background:var(--white);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:var(--sh2);border:1px solid var(--borde);}
+.rc2 h3{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:14px;}
+.irow{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px;}
+.ig2{display:flex;flex-direction:column;gap:5px;}
+.ig2 label{font-size:12px;font-weight:600;color:var(--text2);}
+.ig2 input{padding:11px 13px;border:2px solid var(--borde);border-radius:12px;font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);outline:none;transition:border 0.2s;color:var(--text);}
+.ig2 input:focus{border-color:var(--g2);}
+.btn-grd{width:100%;padding:14px;background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border:none;border-radius:50px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+.chart-c{background:var(--white);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:var(--sh2);border:1px solid var(--borde);}
+.chart-c h3{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:14px;}
+.ch-area{display:flex;align-items:flex-end;gap:7px;height:88px;margin-bottom:8px;}
+.bc{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end;}
+.bf{width:100%;border-radius:5px 5px 0 0;min-height:5px;}
+.bd{font-size:9px;color:var(--text3);font-weight:600;}
+.ch-leg{display:flex;gap:14px;font-size:11px;color:var(--text2);flex-wrap:wrap;}
+.cdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;}
+.hist-c{background:var(--white);border-radius:18px;padding:18px;box-shadow:var(--sh2);border:1px solid var(--borde);}
+.hist-c h3{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:12px;}
+.hr{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--borde);}
+.hr:last-child{border-bottom:none;}
+.hrf{font-size:12px;color:var(--text2);}
+.hrv{display:flex;gap:14px;}
+.hv{text-align:center;}
+.hvn{font-size:14px;font-weight:700;}
+.hvl{font-size:10px;color:var(--text3);}
+.ok{color:var(--g2);}.warn{color:var(--acc);}.bad{color:var(--acc2);}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--dark);color:#fff;padding:11px 22px;border-radius:28px;font-size:13px;font-weight:600;opacity:0;transition:all 0.3s;pointer-events:none;z-index:999;white-space:nowrap;box-shadow:0 8px 30px rgba(0,0,0,0.3);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes fu{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.fu{animation:fu 0.3s ease forwards;}
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- ONBOARDING -->
-  <div id="screen-onboarding" class="screen active">
-    <div class="onb-hero">
-      <div class="onb-logo">🌿</div>
-      <h1>NutriVida</h1>
-      <p>365 recetas diseñadas para celíacas y diabéticas. Tu salud, cada día.</p>
-      <div class="onb-badges">
-        <span class="onb-badge">Sin TACC</span>
-        <span class="onb-badge">Bajo índice glucémico</span>
-        <span class="onb-badge">365 recetas</span>
-      </div>
+<div id="sc-splash" class="screen active">
+  <div class="sp-bg"><span></span><span></span><span></span></div>
+  <div class="sp-inner">
+    <div class="sp-logo">🌿</div>
+    <h1>NutriVida</h1>
+    <p>Tu plan de alimentación personalizado, adaptado a tu cuerpo y tu salud.</p>
+    <div class="sp-badges">
+      <span class="sp-badge">🌾 Sin TACC</span>
+      <span class="sp-badge">💉 Apta diabéticas</span>
+      <span class="sp-badge">🍽️ 120 recetas</span>
     </div>
-    <div class="onb-body">
-      <!-- STEP 1 -->
-      <div class="step active" id="step-1">
-        <h2>¿Cómo te llamás?</h2>
-        <div class="field">
-          <label>Tu nombre</label>
-          <input type="text" id="input-nombre" placeholder="Ej: María" />
-        </div>
-        <button class="btn-primary" onclick="nextStep(2)">Continuar →</button>
+    <button class="btn-main" id="btn-empezar">Comenzar mi plan →</button>
+    <p class="sp-sub">Gratis · Sin compromisos</p>
+  </div>
+</div>
+<div id="sc-onb" class="screen">
+  <div class="onb-bar-wrap"><div class="onb-bar" id="ob" style="width:12%"></div></div>
+  <div class="onb-body">
+    <div class="onb-step on" id="os1">
+      <div class="step-lbl">Paso 1 de 8</div>
+      <h2>¿Cómo te llamás?</h2>
+      <p class="sub">Vamos a crear tu plan completamente personalizado.</p>
+      <div class="field"><label>Tu nombre</label><input type="text" id="i-nom" placeholder="Ej: María"/></div>
+      <button class="btn-sig" onclick="os(2,25)">Continuar →</button>
+    </div>
+    <div class="onb-step" id="os2">
+      <div class="step-lbl">Paso 2 de 8</div>
+      <h2>¿Cuál es tu género?</h2>
+      <p class="sub">Lo usamos para calcular tus calorías con precisión.</p>
+      <div class="og og3">
+        <div class="oc sel" onclick="sel(this,'gen','f')" data-g="gen"><div class="chk">✓</div><div class="oi">👩</div><div class="ol">Mujer</div></div>
+        <div class="oc" onclick="sel(this,'gen','m')" data-g="gen"><div class="chk">✓</div><div class="oi">👨</div><div class="ol">Hombre</div></div>
+        <div class="oc" onclick="sel(this,'gen','o')" data-g="gen"><div class="chk">✓</div><div class="oi">🌈</div><div class="ol">Otro</div></div>
       </div>
-      <!-- STEP 2 -->
-      <div class="step" id="step-2">
-        <h2>¿Cuál es tu condición?</h2>
-        <div class="option-grid" style="margin-bottom:18px">
-          <div class="option-card selected" onclick="selectOption(this,'cond','celiaca')" data-group="cond" data-val="celiaca">
-            <div class="oc-icon">🌾</div>
-            <div class="oc-label">Celíaca</div>
-            <div class="oc-sub">Sin TACC</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'cond','diabetica')" data-group="cond" data-val="diabetica">
-            <div class="oc-icon">💉</div>
-            <div class="oc-label">Diabética</div>
-            <div class="oc-sub">Control glucémico</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'cond','ambas')" data-group="cond" data-val="ambas">
-            <div class="oc-icon">🌿</div>
-            <div class="oc-label">Ambas</div>
-            <div class="oc-sub">Sin TACC + glucemia</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'cond','otra')" data-group="cond" data-val="otra">
-            <div class="oc-icon">💚</div>
-            <div class="oc-label">Otra / General</div>
-            <div class="oc-sub">Solo comer sano</div>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="nextStep(3)">Continuar →</button>
-        <button class="btn-sec" onclick="nextStep(1)">← Atrás</button>
+      <button class="btn-sig" onclick="os(3,37)">Continuar →</button>
+      <button class="btn-volver" onclick="os(1,12)">← Atrás</button>
+    </div>
+    <div class="onb-step" id="os3">
+      <div class="step-lbl">Paso 3 de 8</div>
+      <h2>Tus medidas</h2>
+      <p class="sub">Solo para calcular tu plan. Nadie más lo ve.</p>
+      <div class="inp-row">
+        <div class="field"><label>Peso (kg)</label><input type="number" id="i-peso" placeholder="65" min="30" max="200"/></div>
+        <div class="field"><label>Altura (cm)</label><input type="number" id="i-alt" placeholder="165" min="100" max="220"/></div>
       </div>
-      <!-- STEP 3 -->
-      <div class="step" id="step-3">
-        <h2>¿Cuánto actividad física hacés?</h2>
-        <div class="option-grid" style="margin-bottom:18px">
-          <div class="option-card selected" onclick="selectOption(this,'act','sedentaria')" data-group="act" data-val="sedentaria">
-            <div class="oc-icon">🛋️</div>
-            <div class="oc-label">Sedentaria</div>
-            <div class="oc-sub">Poca o ninguna</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'act','leve')" data-group="act" data-val="leve">
-            <div class="oc-icon">🚶</div>
-            <div class="oc-label">Leve</div>
-            <div class="oc-sub">1-2 días/semana</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'act','moderada')" data-group="act" data-val="moderada">
-            <div class="oc-icon">🏃</div>
-            <div class="oc-label">Moderada</div>
-            <div class="oc-sub">3-4 días/semana</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'act','intensa')" data-group="act" data-val="intensa">
-            <div class="oc-icon">🏋️</div>
-            <div class="oc-label">Intensa</div>
-            <div class="oc-sub">5+ días/semana</div>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="finishOnboarding()">¡Empezar! →</button>
-        <button class="btn-sec" onclick="nextStep(2)">← Atrás</button>
+      <div class="field"><label>Edad</label><input type="number" id="i-edad" placeholder="45" min="18" max="90"/></div>
+      <button class="btn-sig" onclick="os(4,50)">Continuar →</button>
+      <button class="btn-volver" onclick="os(2,25)">← Atrás</button>
+    </div>
+    <div class="onb-step" id="os4">
+      <div class="step-lbl">Paso 4 de 8</div>
+      <h2>¿Tenés alguna condición de salud?</h2>
+      <p class="sub">Filtramos todas las recetas para que sean aptas para vos.</p>
+      <div class="og">
+        <div class="oc sel" onclick="sel(this,'cond','celiaca')" data-g="cond"><div class="chk">✓</div><div class="oi">🌾</div><div class="ol">Celíaca</div><div class="os">Sin TACC</div></div>
+        <div class="oc" onclick="sel(this,'cond','diabetica')" data-g="cond"><div class="chk">✓</div><div class="oi">💉</div><div class="ol">Diabética</div><div class="os">Control glucemia</div></div>
+        <div class="oc" onclick="sel(this,'cond','ambas')" data-g="cond"><div class="chk">✓</div><div class="oi">🌿</div><div class="ol">Las dos</div><div class="os">Sin TACC + glucemia</div></div>
+        <div class="oc" onclick="sel(this,'cond','ninguna')" data-g="cond"><div class="chk">✓</div><div class="oi">💚</div><div class="ol">Ninguna</div><div class="os">Solo comer sano</div></div>
       </div>
+      <button class="btn-sig" onclick="os(5,62)">Continuar →</button>
+      <button class="btn-volver" onclick="os(3,37)">← Atrás</button>
+    </div>
+    <div class="onb-step" id="os5">
+      <div class="step-lbl">Paso 5 de 8</div>
+      <h2>¿Cuánto te movés en el día a día?</h2>
+      <p class="sub">Pensá en tu rutina normal, sin contar el ejercicio.</p>
+      <div class="og">
+        <div class="oc sel" onclick="sel(this,'act','s')" data-g="act"><div class="chk">✓</div><div class="oi">🛋️</div><div class="ol">Casi nada</div><div class="os">Trabajo sentada</div></div>
+        <div class="oc" onclick="sel(this,'act','l')" data-g="act"><div class="chk">✓</div><div class="oi">🚶</div><div class="ol">Camino algo</div><div class="os">1-2 veces por semana</div></div>
+        <div class="oc" onclick="sel(this,'act','m')" data-g="act"><div class="chk">✓</div><div class="oi">🏃</div><div class="ol">Me muevo bastante</div><div class="os">3-4 veces por semana</div></div>
+        <div class="oc" onclick="sel(this,'act','i')" data-g="act"><div class="chk">✓</div><div class="oi">🏋️</div><div class="ol">Mucho ejercicio</div><div class="os">5 o más veces</div></div>
+      </div>
+      <button class="btn-sig" onclick="os(6,75)">Continuar →</button>
+      <button class="btn-volver" onclick="os(4,50)">← Atrás</button>
+    </div>
+    <div class="onb-step" id="os6">
+      <div class="step-lbl">Paso 6 de 8</div>
+      <h2>¿Cuál es tu objetivo principal?</h2>
+      <p class="sub">Elegí lo que más se acerca a lo que querés lograr.</p>
+      <div class="og">
+        <div class="oc sel" onclick="sel(this,'obj','bajar')" data-g="obj"><div class="chk">✓</div><div class="oi">⬇️</div><div class="ol">Quiero bajar de peso</div><div class="os">A mi ritmo, sin pasar hambre</div></div>
+        <div class="oc" onclick="sel(this,'obj','tonificar')" data-g="obj"><div class="chk">✓</div><div class="oi">💪</div><div class="ol">Quiero tonificar</div><div class="os">Fortalecer y sentirme bien</div></div>
+        <div class="oc" onclick="sel(this,'obj','mantener')" data-g="obj"><div class="chk">✓</div><div class="oi">⚖️</div><div class="ol">Quiero mantenerme</div><div class="os">Estoy bien como estoy</div></div>
+        <div class="oc" onclick="sel(this,'obj','salud')" data-g="obj"><div class="chk">✓</div><div class="oi">❤️</div><div class="ol">Mejorar mi salud</div><div class="os">Comer mejor cada día</div></div>
+      </div>
+      <button class="btn-sig" onclick="os(7,87)">Continuar →</button>
+      <button class="btn-volver" onclick="os(5,62)">← Atrás</button>
+    </div>
+    <div class="onb-step" id="os7">
+      <div class="step-lbl">Paso 7 de 8</div>
+      <h2>¿Algo más que debamos saber?</h2>
+      <p class="sub">Seleccioná todo lo que aplique a vos.</p>
+      <div class="og">
+        <div class="oc" onclick="togM(this,'extra','lactosa')" data-g="extra"><div class="chk">✓</div><div class="oi">🥛</div><div class="ol">Sin lactosa</div><div class="os">Intolerante a la leche</div></div>
+        <div class="oc" onclick="togM(this,'extra','vegetariana')" data-g="extra"><div class="chk">✓</div><div class="oi">🥦</div><div class="ol">Vegetariana</div><div class="os">Sin carnes</div></div>
+        <div class="oc" onclick="togM(this,'extra','hipertension')" data-g="extra"><div class="chk">✓</div><div class="oi">❤️‍🩹</div><div class="ol">Presión alta</div><div class="os">Bajo en sodio</div></div>
+        <div class="oc sel" onclick="togM(this,'extra','ninguno')" data-g="extra"><div class="chk">✓</div><div class="oi">✅</div><div class="ol">Ninguna de estas</div><div class="os"></div></div>
+      </div>
+      <button class="btn-sig" onclick="os(8,95)">Continuar →</button>
+      <button class="btn-volver" onclick="os(6,75)">← Atrás</button>
+    </div>
+    <div class="onb-step" id="os8">
+      <div class="step-lbl">¡Último paso!</div>
+      <h2>Tu plan está listo, <span id="onb-nom">amiga</span> 🎉</h2>
+      <p class="sub">Esto es lo que calculamos para vos:</p>
+      <div style="background:var(--bg);border-radius:16px;padding:18px;margin-bottom:22px;">
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--borde);font-size:14px;"><span style="color:var(--text2)">Calorías diarias</span><strong id="res-cals" style="color:var(--g1)">—</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--borde);font-size:14px;"><span style="color:var(--text2)">Tu objetivo</span><strong id="res-obj">—</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--borde);font-size:14px;"><span style="color:var(--text2)">Condición</span><strong id="res-cond">—</strong></div>
+        <div style="display:flex;justify-content:space-between;padding:9px 0;font-size:13px;"><span style="color:var(--text2)">Distribución diaria</span><strong id="res-dist" style="font-size:11px;text-align:right">—</strong></div>
+      </div>
+      <button class="btn-sig" id="btn-iniciar">Ver mi plan personalizado →</button>
+      <button class="btn-volver" onclick="os(7,87)">← Atrás</button>
     </div>
   </div>
-
-  <!-- HOME -->
-  <div id="screen-home" class="screen">
-    <div class="home-header">
-      <div>
-        <h2>Hola, <span id="nombre-display">María</span> 👋</h2>
-        <p id="fecha-display"></p>
-      </div>
-      <div class="avatar" id="avatar-display">M</div>
+</div>
+<div id="sc-home" class="screen">
+  <div style="flex:1;overflow-y:auto;">
+    <div class="h-top">
+      <div><h2>Hola, <span id="n-disp">María</span> 👋</h2><p id="f-disp"></p></div>
+      <div class="av" id="av-disp">M</div>
+    </div>
+    <div class="plan-banner">
+      <div class="pb-tag" id="pb-tag">Tu objetivo</div>
+      <div class="pb-title" id="pb-title">Tu plan está activo</div>
+      <div class="pb-meta" id="pb-meta">120 recetas adaptadas para vos</div>
     </div>
     <div class="stats-row">
-      <div class="stat-card"><div class="sc-num">365</div><div class="sc-label">Recetas</div></div>
-      <div class="stat-card"><div class="sc-num" id="cals-stat">1.850</div><div class="sc-label">Cal/día</div></div>
-      <div class="stat-card"><div class="sc-num">7</div><div class="sc-label">Días menú</div></div>
+      <div class="stat-p"><div class="si sig">🔥</div><div><div class="sn" id="sp-cals">—</div><div class="sl">Cal/día</div></div></div>
+      <div class="stat-p"><div class="si sia">🍽️</div><div><div class="sn">120</div><div class="sl">Recetas</div></div></div>
+      <div class="stat-p"><div class="si sir">❤️</div><div><div class="sn" id="sp-gluc">92</div><div class="sl">mg/dL</div></div></div>
     </div>
-    <div class="section-title">Receta del día</div>
-    <div class="hoy-card">
-      <div class="hc-label">Almuerzo de hoy</div>
-      <div class="hc-title">Tarta de verduras sin TACC</div>
-      <div class="hc-row">
-        <span class="hc-tag">🕐 35 min</span>
-        <span class="hc-tag">280 kcal</span>
-        <span class="hc-tag">IG bajo</span>
-        <span class="hc-tag">Sin gluten</span>
-      </div>
+    <div class="sec-h"><h3>Receta del día</h3></div>
+    <div class="hoy-hero">
+      <div class="hh-tag">✨ SUGERIDA PARA VOS</div>
+      <div class="hh-title" id="hoy-tit">Cargando...</div>
+      <div class="hh-chips" id="hoy-chips"></div>
+      <button class="btn-ver" id="btn-ver-hoy">Ver receta →</button>
     </div>
-    <div class="section-title">Populares hoy</div>
-    <div class="recetas-scroll">
-      <div class="mini-card" onclick="abrirReceta(0)">
-        <div class="mc-emoji">🥗</div>
-        <div class="mc-body"><div class="mc-name">Ensalada mediterránea</div><div class="mc-tag">Almuerzo · 210 kcal</div></div>
-      </div>
-      <div class="mini-card" onclick="abrirReceta(1)">
-        <div class="mc-emoji">🍳</div>
-        <div class="mc-body"><div class="mc-name">Revuelto de espinaca</div><div class="mc-tag">Desayuno · 180 kcal</div></div>
-      </div>
-      <div class="mini-card" onclick="abrirReceta(2)">
-        <div class="mc-emoji">🍲</div>
-        <div class="mc-body"><div class="mc-name">Sopa de lentejas</div><div class="mc-tag">Cena · 240 kcal</div></div>
-      </div>
-      <div class="mini-card" onclick="abrirReceta(3)">
-        <div class="mc-emoji">🫐</div>
-        <div class="mc-body"><div class="mc-name">Bowl de frutas y semillas</div><div class="mc-tag">Merienda · 150 kcal</div></div>
-      </div>
+    <div class="sec-h"><h3>Desayunos sugeridos</h3><a onclick="filtrarYver('desayuno')">Ver todos →</a></div>
+    <div class="rscroll" id="sc-des"></div>
+    <div class="sec-h"><h3>Almuerzos sugeridos</h3><a onclick="filtrarYver('almuerzo')">Ver todos →</a></div>
+    <div class="rscroll" id="sc-alm"></div>
+    <div class="sec-h"><h3>Meriendas</h3><a onclick="filtrarYver('merienda')">Ver todas →</a></div>
+    <div class="rscroll" id="sc-mer"></div>
+    <div class="tip-c">
+      <div style="font-size:26px;flex-shrink:0">💡</div>
+      <div><div class="tip-lbl">Consejo del día</div><div class="tip-txt" id="tip-txt"></div></div>
     </div>
-    <div style="height:20px"></div>
-    <nav class="nav-bottom">
-      <button class="nav-btn active" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
-      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
-      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
-      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
-      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
-    </nav>
   </div>
-
-  <!-- RECETAS -->
-  <div id="screen-recetas" class="screen">
-    <div class="recetas-header">
-      <h2>Recetas</h2>
-      <div class="filtros">
-        <button class="filtro-btn active" onclick="filtrar(this,'todos')">Todas</button>
-        <button class="filtro-btn" onclick="filtrar(this,'desayuno')">🌅 Desayuno</button>
-        <button class="filtro-btn" onclick="filtrar(this,'almuerzo')">☀️ Almuerzo</button>
-        <button class="filtro-btn" onclick="filtrar(this,'merienda')">🍵 Merienda</button>
-        <button class="filtro-btn" onclick="filtrar(this,'cena')">🌙 Cena</button>
-      </div>
-    </div>
-    <div class="receta-lista" id="receta-lista"></div>
-    <nav class="nav-bottom">
-      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
-      <button class="nav-btn active" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
-      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
-      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
-      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
-    </nav>
-  </div>
-
-  <!-- DETALLE RECETA -->
-  <div id="screen-detalle" class="screen">
-    <div class="det-header">
-      <div class="det-emoji-bg" id="det-emoji">🥗</div>
-      <button class="det-back" onclick="goTo('recetas')">←</button>
-    </div>
-    <div class="det-body" id="det-body"></div>
-  </div>
-
-  <!-- MENU SEMANAL -->
-  <div id="screen-menu" class="screen">
-    <div class="menu-header">
-      <h2>Menú semanal</h2>
-      <p>Semana del <span id="semana-label"></span></p>
-    </div>
-    <div id="menu-dias"></div>
-    <button class="compras-btn" onclick="mostrarCompras()">🛒 Ver lista de compras</button>
-    <div style="height:20px"></div>
-    <nav class="nav-bottom">
-      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
-      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
-      <button class="nav-btn active" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
-      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
-      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
-    </nav>
-  </div>
-
-  <!-- CALCULADORA -->
-  <div id="screen-calc" class="screen">
-    <div class="calc-header"><h2>Calculadora de calorías</h2></div>
-    <div class="calc-body">
-      <div class="slider-field">
-        <label>Peso (kg) <span id="val-peso">65</span> kg</label>
-        <input type="range" min="40" max="130" value="65" step="1" oninput="calcular()" id="sl-peso">
-      </div>
-      <div class="slider-field">
-        <label>Altura (cm) <span id="val-altura">165</span> cm</label>
-        <input type="range" min="140" max="200" value="165" step="1" oninput="calcular()" id="sl-altura">
-      </div>
-      <div class="slider-field">
-        <label>Edad <span id="val-edad">35</span> años</label>
-        <input type="range" min="18" max="80" value="35" step="1" oninput="calcular()" id="sl-edad">
-      </div>
-      <div class="field" style="margin-bottom:20px">
-        <label>Nivel de actividad</label>
-        <div class="option-grid">
-          <div class="option-card selected" onclick="selectOption(this,'act2','sedentaria');calcular()" data-group="act2" data-val="sedentaria" style="padding:10px">
-            <div class="oc-icon" style="font-size:18px">🛋️</div>
-            <div class="oc-label" style="font-size:12px">Sedentaria</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'act2','leve');calcular()" data-group="act2" data-val="leve" style="padding:10px">
-            <div class="oc-icon" style="font-size:18px">🚶</div>
-            <div class="oc-label" style="font-size:12px">Leve</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'act2','moderada');calcular()" data-group="act2" data-val="moderada" style="padding:10px">
-            <div class="oc-icon" style="font-size:18px">🏃</div>
-            <div class="oc-label" style="font-size:12px">Moderada</div>
-          </div>
-          <div class="option-card" onclick="selectOption(this,'act2','intensa');calcular()" data-group="act2" data-val="intensa" style="padding:10px">
-            <div class="oc-icon" style="font-size:18px">🏋️</div>
-            <div class="oc-label" style="font-size:12px">Intensa</div>
-          </div>
-        </div>
-      </div>
-      <div class="result-big">
-        <div class="rb-num"><span id="result-cals">1.965</span></div>
-        <div class="rb-label">calorías diarias recomendadas</div>
-      </div>
-      <div class="macros-grid">
-        <div class="macro-card mc-prot"><div class="mv" id="m-prot">147g</div><div class="ml">Proteínas</div></div>
-        <div class="macro-card mc-carb"><div class="mv" id="m-carb">221g</div><div class="ml">Carbohidratos</div></div>
-        <div class="macro-card mc-gras"><div class="mv" id="m-gras">65g</div><div class="ml">Grasas</div></div>
-      </div>
-      <div style="background:var(--verde-light);border-radius:14px;padding:14px;font-size:13px;color:var(--verde-dark);line-height:1.6">
-        💡 <strong>Tip para celíacas:</strong> Priorizá carbohidratos de arroz, maíz, quinoa y papa. Evitá todo producto con trigo, avena, cebada o centeno.
-      </div>
-    </div>
-    <nav class="nav-bottom">
-      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
-      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
-      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
-      <button class="nav-btn active" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
-      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
-    </nav>
-  </div>
-
-  <!-- SEGUIMIENTO -->
-  <div id="screen-seguimiento" class="screen">
-    <div class="seg-header">
-      <h2>Seguimiento de salud</h2>
-      <p>Registrá tu peso y glucosa diariamente</p>
-    </div>
-    <div class="seg-body">
-      <div class="registro-form">
-        <h3>Registro de hoy</h3>
-        <div class="input-row">
-          <div class="input-group">
-            <label>Peso (kg)</label>
-            <input type="number" id="inp-peso" placeholder="65.0" step="0.1">
-          </div>
-          <div class="input-group">
-            <label>Glucosa (mg/dL)</label>
-            <input type="number" id="inp-glucosa" placeholder="95">
-          </div>
-        </div>
-        <button class="btn-guardar" onclick="guardarRegistro()">Guardar registro</button>
-      </div>
-
-      <div class="chart-container">
-        <h3>Glucosa últimos 7 días</h3>
-        <div class="chart-bars" id="glucosa-chart"></div>
-      </div>
-
-      <div class="registros-lista">
-        <h3>Historial</h3>
-        <div id="historial-lista"></div>
-      </div>
-    </div>
-    <nav class="nav-bottom">
-      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
-      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
-      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
-      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
-      <button class="nav-btn active" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
-    </nav>
-  </div>
-
-  <div class="toast" id="toast"></div>
+  <nav class="nav">
+    <button class="nb on" onclick="ir('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="nb" onclick="ir('rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+    <button class="nb" onclick="ir('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+    <button class="nb" onclick="ir('sal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+  </nav>
 </div>
+<div id="sc-rec" class="screen">
+  <div style="flex:1;overflow-y:auto;">
+    <div class="rh">
+      <h2>Recetas</h2>
+      <div class="search-w"><span>🔍</span><input type="text" placeholder="Buscar receta..." oninput="buscar(this.value)" id="si"/></div>
+      <div class="ftabs">
+        <button class="ft on" onclick="ft(this,'todos')">Todas</button>
+        <button class="ft" id="ft-des" onclick="ft(this,'desayuno')">🌅 Desayuno</button>
+        <button class="ft" id="ft-alm" onclick="ft(this,'almuerzo')">☀️ Almuerzo</button>
+        <button class="ft" id="ft-mer" onclick="ft(this,'merienda')">🍵 Merienda</button>
+        <button class="ft" id="ft-cen" onclick="ft(this,'cena')">🌙 Cena</button>
+      </div>
+    </div>
+    <div class="rlista" id="rl"></div>
+  </div>
+  <nav class="nav">
+    <button class="nb" onclick="ir('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="nb on" onclick="ir('rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+    <button class="nb" onclick="ir('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+    <button class="nb" onclick="ir('sal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+  </nav>
+</div>
+<div id="sc-det" class="screen">
+  <div style="flex:1;overflow-y:auto;">
+    <div class="det-hero rcv" id="det-bg"><span id="det-em" style="font-size:88px">🥗</span></div>
+    <button class="det-back" onclick="volverDet()">←</button>
+    <button class="det-fav" id="det-fav" onclick="togFav()">🤍</button>
+    <div class="det-bd fu" id="det-bd"></div>
+  </div>
+</div>
+<div id="sc-menu" class="screen">
+  <div style="flex:1;overflow-y:auto;">
+    <div class="mh"><h2>Menú semanal</h2><p id="sem-txt">Personalizado para tu objetivo</p></div>
+    <div id="dias-wrap"></div>
+    <button class="compras-btn" onclick="abrirCompras()">🛒 Lista de compras completa</button>
+    <div style="height:10px"></div>
+  </div>
+  <nav class="nav">
+    <button class="nb" onclick="ir('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="nb" onclick="ir('rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+    <button class="nb on" onclick="ir('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+    <button class="nb" onclick="ir('sal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+  </nav>
+</div>
+<div class="mo" id="mo-comp" onclick="cerrarCompClick(event)">
+  <div class="mb">
+    <div class="mh2"></div>
+    <h3>Lista de compras 🛒</h3>
+    <p class="ms">Tocá cada item para tacharlo</p>
+    <div id="comp-cont"></div>
+    <button class="mc-close" onclick="cerrarCompras()">Listo ✓</button>
+  </div>
+</div>
+<div id="sc-sal" class="screen">
+  <div style="flex:1;overflow-y:auto;">
+    <div class="sh"><h2>Seguimiento</h2><p>Registrá tu progreso diario</p></div>
+    <div class="sb">
+      <div class="rc2">
+        <h3>📝 Registro de hoy</h3>
+        <div class="irow">
+          <div class="ig2"><label>Peso (kg)</label><input type="number" id="i-p" placeholder="65.0" step="0.1"></div>
+          <div class="ig2"><label>Glucosa (mg/dL)</label><input type="number" id="i-g" placeholder="95"></div>
+        </div>
+        <button class="btn-grd" onclick="guardar()">Guardar ✓</button>
+      </div>
+      <div class="chart-c">
+        <h3>📊 Glucosa — últimos días</h3>
+        <div class="ch-area" id="ch-area"></div>
+        <div class="ch-leg">
+          <span><span class="cdot" style="background:var(--g2)"></span>Normal (&lt;100)</span>
+          <span><span class="cdot" style="background:var(--acc)"></span>Atención</span>
+          <span><span class="cdot" style="background:var(--acc2)"></span>Alto</span>
+        </div>
+      </div>
+      <div class="hist-c">
+        <h3>📅 Historial</h3>
+        <div id="hist"></div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nb" onclick="ir('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+    <button class="nb" onclick="ir('rec')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+    <button class="nb" onclick="ir('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+    <button class="nb on" onclick="ir('sal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
 
 <script>
-const recetas = [
-  { id:0, nombre:'Ensalada mediterránea', tipo:'almuerzo', emoji:'🥗', cals:210, tiempo:'15 min', ig:'Bajo', tags:['Sin TACC','IG Bajo'], ingredientes:[['Lechuga romana','2 tazas'],['Tomate cherry','100g'],['Pepino','1/2 unidad'],['Aceitunas negras','30g'],['Aceite de oliva','1 cda'],['Limón','1/2 unidad'],['Sal y pimienta','a gusto']], pasos:['Lavá y cortá la lechuga en trozos medianos.','Cortá los tomates cherry por la mitad y el pepino en rodajas finas.','Mezclá todos los vegetales en un bol grande.','Agregá las aceitunas, el aceite de oliva y el jugo de limón.','Condimentá con sal y pimienta. Serví frío.'] },
-  { id:1, nombre:'Revuelto de espinaca y huevo', tipo:'desayuno', emoji:'🍳', cals:180, tiempo:'10 min', ig:'Bajo', tags:['Sin TACC','IG Bajo','Alto en proteínas'], ingredientes:[['Huevos','2 unidades'],['Espinaca fresca','1 taza'],['Ajo','1 diente'],['Aceite de oliva','1 cdita'],['Sal','a gusto']], pasos:['Calentá el aceite en una sartén a fuego medio.','Sofreí el ajo picado por 1 minuto.','Agregá la espinaca y cociná hasta que reduzca.','Batí los huevos, vertalos sobre la espinaca y revolvé suavemente.','Condimentá y serví caliente.'] },
-  { id:2, nombre:'Sopa de lentejas', tipo:'cena', emoji:'🍲', cals:240, tiempo:'40 min', ig:'Bajo-medio', tags:['Sin TACC','Alto en fibra'], ingredientes:[['Lentejas','1 taza'],['Zanahoria','1 grande'],['Cebolla','1/2 unidad'],['Tomate','1 unidad'],['Caldo vegetal sin TACC','500ml'],['Comino','1 cdita'],['Sal','a gusto']], pasos:['Remojá las lentejas 30 minutos antes. Escurrí.','En una olla, sofreí la cebolla y zanahoria picadas por 5 minutos.','Agregá el tomate picado y el comino. Cociná 3 minutos.','Sumá las lentejas y el caldo. Lleví a hervor.','Bajá el fuego y cociná 25 minutos hasta que estén tiernas. Condimentá.'] },
-  { id:3, nombre:'Bowl de frutas y semillas', tipo:'merienda', emoji:'🫐', cals:150, tiempo:'5 min', ig:'Medio', tags:['Sin TACC','Natural'], ingredientes:[['Banana','1 unidad'],['Frutillas','100g'],['Semillas de chía','1 cda'],['Semillas de girasol','1 cda'],['Miel (opcional)','1 cdita']], pasos:['Cortá la banana en rodajas y las frutillas en mitades.','Colocá las frutas en un bol.','Esparcí las semillas de chía y girasol por encima.','Si querés más dulzor, agregá un chorrito de miel.','Serví de inmediato o guardá en la heladera.'] },
-  { id:4, nombre:'Tarta de verduras sin TACC', tipo:'almuerzo', emoji:'🥧', cals:280, tiempo:'35 min', ig:'Bajo', tags:['Sin TACC','IG Bajo'], ingredientes:[['Harina de arroz','200g'],['Huevo','3 unidades'],['Zapallito','2 unidades'],['Cebolla','1 unidad'],['Queso untable descremado','100g'],['Aceite','2 cdas'],['Sal y pimienta','a gusto']], pasos:['Mezclá la harina de arroz con 2 huevos y aceite para la masa.','Estirá la masa y colocala en un molde enmantecado.','Sofreí la cebolla y el zapallito rallado.','Batí el huevo restante con el queso untable y mezclá con las verduras.','Volcá el relleno sobre la masa y cociná 25 min a 180°C.'] },
-  { id:5, nombre:'Porridge de avena sin gluten', tipo:'desayuno', emoji:'🥣', cals:220, tiempo:'8 min', ig:'Bajo', tags:['Sin TACC','Sin gluten'], ingredientes:[['Avena certificada sin TACC','1/2 taza'],['Leche descremada','1 taza'],['Canela','1/2 cdita'],['Banana','1/2 unidad'],['Nueces','20g']], pasos:['En una olla, mezcla la avena con la leche.','Cociná a fuego medio revolviendo constantemente por 5 minutos.','Agregá la canela y una pizca de sal.','Serví en un bol y decorá con banana en rodajas y nueces.','Podés endulzar con stevia si lo preferís.'] },
-  { id:6, nombre:'Pollo al limón con arroz', tipo:'cena', emoji:'🍗', cals:320, tiempo:'30 min', ig:'Bajo-medio', tags:['Sin TACC','Alto en proteínas'], ingredientes:[['Pechuga de pollo','200g'],['Arroz integral','1/2 taza'],['Limón','1 unidad'],['Ajo','2 dientes'],['Romero','a gusto'],['Aceite de oliva','1 cda']], pasos:['Marinare el pollo con jugo de limón, ajo y romero por 15 minutos.','Cociná el arroz integral según indicaciones del paquete.','En sartén caliente con aceite, sellá el pollo 4 minutos por lado.','Bajá el fuego y cociná 10 minutos más con tapa.','Serví sobre el arroz con rodajas de limón.'] },
-  { id:7, nombre:'Licuado verde antioxidante', tipo:'merienda', emoji:'🥤', cals:120, tiempo:'5 min', ig:'Bajo', tags:['Sin TACC','IG Bajo','Detox'], ingredientes:[['Espinaca baby','1 taza'],['Pepino','1/2 unidad'],['Manzana verde','1 unidad'],['Jengibre','1 cm'],['Agua','200ml'],['Hielo','a gusto']], pasos:['Lavá bien todos los vegetales y la fruta.','Cortá la manzana en trozos retirando las semillas.','Colocá todo en la licuadora.','Agregá el agua y el hielo.','Procesá hasta obtener una mezcla homogénea. Serví frío.'] },
+const REC=[
+{id:0,n:'Porridge de avena sin gluten',t:'desayuno',e:'🥣',bg:'rca',k:220,m:'8 min',ig:'Bajo',tags:['Sin TACC'],i:[['Avena cert. sin TACC','½ taza'],['Leche descremada','1 taza'],['Canela','½ cdita'],['Banana','½'],['Nueces','20g']],p:['Hervíla leche en una olla a fuego medio.','Agregá la avena y revolvé constantemente por 5 minutos.','Añadí la canela y una pizca de sal.','Serví en un bol y decorá con banana en rodajas y nueces.']},
+{id:1,n:'Revuelto de espinaca y huevo',t:'desayuno',e:'🍳',bg:'rca',k:180,m:'10 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Huevos','2'],['Espinaca fresca','1 taza'],['Ajo','1 diente'],['Aceite de oliva','1 cdita'],['Sal','a gusto']],p:['Calentá el aceite en sartén a fuego medio.','Sofreí el ajo picado 1 minuto.','Agregá la espinaca hasta que reduzca.','Batí los huevos y revolvé suavemente hasta cocinar.']},
+{id:2,n:'Tostadas de arroz con palta',t:'desayuno',e:'🥑',bg:'rcv',k:210,m:'5 min',ig:'Bajo',tags:['Sin TACC'],i:[['Tostadas de arroz sin TACC','3'],['Palta','½'],['Limón','unas gotas'],['Sal y pimienta','a gusto'],['Semillas de sésamo','1 cdita']],p:['Pisá la palta con un tenedor.','Condimentá con limón, sal y pimienta.','Untá las tostadas con la preparación.','Espolvoreá las semillas de sésamo encima.']},
+{id:3,n:'Yogur con frutas y semillas',t:'desayuno',e:'🫙',bg:'rcp',k:190,m:'3 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Yogur descremado natural','200g'],['Frutillas','100g'],['Semillas de chía','1 cda'],['Miel','1 cdita'],['Granola sin TACC','2 cdas']],p:['Colocá el yogur en un bol.','Cortá las frutillas y ponelas encima.','Agregá las semillas de chía y la granola.','Rociá con miel y serví de inmediato.']},
+{id:4,n:'Omelet de verduras coloridas',t:'desayuno',e:'🥚',bg:'rca',k:200,m:'12 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Huevos','2'],['Morrón rojo','¼'],['Cebolla de verdeo','1'],['Tomate cherry','5'],['Aceite','1 cdita'],['Sal','a gusto']],p:['Batí los huevos con sal y pimienta.','Sofreí las verduras picadas 3 minutos.','Volcá los huevos sobre las verduras.','Doblá el omelet al medio cuando esté firme.']},
+{id:5,n:'Batido de banana y maní',t:'desayuno',e:'🥤',bg:'rca',k:260,m:'5 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Banana','1'],['Leche descremada','200ml'],['Mantequilla de maní natural','1 cda'],['Canela','a gusto'],['Hielo','3 cubos']],p:['Poné todos los ingredientes en la licuadora.','Procesá hasta obtener una mezcla homogénea.','Si quedó muy espeso agregá un poco más de leche.','Serví de inmediato bien frío.']},
+{id:6,n:'Panqueques de harina de coco',t:'desayuno',e:'🥞',bg:'rca',k:230,m:'15 min',ig:'Bajo',tags:['Sin TACC'],i:[['Harina de coco','3 cdas'],['Huevos','2'],['Leche de almendras','3 cdas'],['Miel','1 cdita'],['Aceite de coco','1 cdita']],p:['Mezclá todos los ingredientes hasta obtener una masa.','Calentá una sartén a fuego bajo con aceite de coco.','Volcá cucharadas de masa y cociná 2 min por lado.','Serví con frutas frescas por encima.']},
+{id:7,n:'Bowl de quinoa con frutas',t:'desayuno',e:'🍓',bg:'rcp',k:240,m:'10 min',ig:'Bajo',tags:['Sin TACC'],i:[['Quinoa cocida','½ taza'],['Leche de coco','3 cdas'],['Mango','½'],['Kiwi','1'],['Semillas de lino','1 cdita']],p:['Calentá la quinoa con la leche de coco.','Servila en un bol.','Cortá las frutas en trozos y colocalas encima.','Espolvoreá las semillas de lino y serví.']},
+{id:8,n:'Tostadas con queso fresco y tomate',t:'desayuno',e:'🍅',bg:'rcv',k:195,m:'5 min',ig:'Bajo',tags:['Sin TACC'],i:[['Pan sin TACC','2 fetas'],['Queso fresco descremado','50g'],['Tomate','½'],['Orégano','a gusto'],['Aceite de oliva','1 cdita']],p:['Tostá el pan sin TACC.','Cortá el tomate en rodajas.','Armá las tostadas con queso y tomate.','Condimentá con orégano y un chorrito de aceite.']},
+{id:9,n:'Muffins de zanahoria sin TACC',t:'desayuno',e:'🧁',bg:'rca',k:215,m:'25 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Harina de arroz','1 taza'],['Zanahoria rallada','1'],['Huevo','1'],['Aceite','2 cdas'],['Azúcar mascabo','2 cdas'],['Canela','1 cdita']],p:['Mezclá los ingredientes secos.','Agregá el huevo, aceite y zanahoria. Mezclá.','Volcá en molde de muffins aceitado.','Cociná en horno a 180°C por 20 minutos.']},
+{id:10,n:'Chia pudding con frutos rojos',t:'desayuno',e:'🫐',bg:'rcb',k:200,m:'5 min + reposo',ig:'Bajo',tags:['Sin TACC'],i:[['Semillas de chía','3 cdas'],['Leche vegetal sin TACC','250ml'],['Miel','1 cdita'],['Frutillas','50g'],['Arándanos','30g']],p:['Mezclá las semillas con la leche y la miel.','Revolvé bien para que no se formen grumos.','Refrigerá al menos 4 horas o toda la noche.','Serví con las frutas encima.']},
+{id:11,n:'Fruta con ricota y nueces',t:'desayuno',e:'🍑',bg:'rcp',k:185,m:'5 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Ricota descremada','100g'],['Durazno','1'],['Nueces','20g'],['Miel','1 cdita'],['Canela','a gusto']],p:['Colocá la ricota en un bol.','Cortá el durazno en gajos.','Acomodá la fruta sobre la ricota.','Agregá las nueces, la miel y la canela.']},
+{id:12,n:'Crepes de harina de arroz',t:'desayuno',e:'🫓',bg:'rca',k:220,m:'20 min',ig:'Bajo',tags:['Sin TACC'],i:[['Harina de arroz','½ taza'],['Huevo','1'],['Leche descremada','150ml'],['Aceite','1 cdita'],['Sal','a gusto']],p:['Batí todos los ingredientes hasta obtener una masa lisa.','Calentá una sartén con muy poco aceite.','Volcá una capa fina de masa y cociná 2 minutos por lado.','Rellená con queso y verduras o frutas.']},
+{id:13,n:'Banana con mantequilla de almendras',t:'desayuno',e:'🍌',bg:'rca',k:175,m:'2 min',ig:'Medio',tags:['Sin TACC'],i:[['Banana','1'],['Mantequilla de almendras','1 cda'],['Canela','a gusto']],p:['Cortá la banana en rodajas.','Untá cada rodaja con un poco de mantequilla de almendras.','Espolvoreá con canela y serví.']},
+{id:14,n:'Huevos pochados con espárragos',t:'desayuno',e:'🥦',bg:'rcv',k:190,m:'12 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Huevos','2'],['Espárragos','6'],['Aceite de oliva','1 cdita'],['Sal y pimienta','a gusto'],['Limón','unas gotas']],p:['Hervílos espárragos al vapor 5 minutos.','Herví agua con un chorrito de vinagre.','Cuando hierva, hacé un remolino y tirá los huevos.','Cociná 3 minutos. Serví con espárragos y limón.']},
+{id:15,n:'Smoothie bowl verde',t:'desayuno',e:'🫛',bg:'rcv',k:230,m:'8 min',ig:'Bajo',tags:['Sin TACC'],i:[['Espinaca','1 puñado'],['Banana congelada','½'],['Manzana verde','½'],['Leche de coco','4 cdas'],['Granola sin TACC','2 cdas']],p:['Procesá la espinaca con la banana y manzana.','Agregá la leche de coco hasta obtener consistencia espesa.','Volcá en un bol.','Decorá con granola sin TACC y semillas.']},
+{id:16,n:'Tostadas con huevo y palta',t:'desayuno',e:'🫑',bg:'rcv',k:245,m:'8 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pan sin TACC','2 fetas'],['Huevo','1'],['Palta','¼'],['Tomate','3 rodajas'],['Sal y pimienta','a gusto']],p:['Tostá el pan.','Cociná el huevo a tu gusto.','Pisá la palta con sal y pimienta.','Armá las tostadas con palta, tomate y huevo.']},
+{id:17,n:'Avena overnight',t:'desayuno',e:'🌙',bg:'rca',k:235,m:'5 min + reposo',ig:'Bajo',tags:['Sin TACC'],i:[['Avena sin TACC','½ taza'],['Leche descremada','200ml'],['Chía','1 cdita'],['Canela','a gusto'],['Frutos rojos','para decorar']],p:['Mezcla la avena, leche, chía y canela en un frasco.','Revolvé bien y tapá.','Refrigerá toda la noche.','Por la mañana, servíla con los frutos rojos encima.']},
+{id:18,n:'Tortilla española sin gluten',t:'desayuno',e:'🥔',bg:'rca',k:255,m:'20 min',ig:'Medio',tags:['Sin TACC'],i:[['Huevos','3'],['Papa','1 mediana'],['Cebolla','½'],['Aceite de oliva','1 cda'],['Sal','a gusto']],p:['Cortá la papa en rodajas finas y cociná en aceite.','Agregá la cebolla picada y cociná hasta tierna.','Batí los huevos y mezclá con papa y cebolla.','En sartén a fuego bajo, cociná tapada 8 min de cada lado.']},
+{id:19,n:'Arroz con leche proteico',t:'desayuno',e:'🍚',bg:'rca',k:210,m:'20 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Arroz fino','¼ taza'],['Leche descremada','300ml'],['Canela','1 rama'],['Stevia','a gusto'],['Ralladura de limón','de ½ limón']],p:['Herví el arroz con la leche, canela y ralladura.','Revolvé seguido para que no se pegue.','Cociná a fuego bajo unos 18 minutos.','Endulzá con stevia y serví tibio o frío.']},
+{id:20,n:'Waffles de banana',t:'desayuno',e:'🧇',bg:'rca',k:240,m:'15 min',ig:'Medio',tags:['Sin TACC'],i:[['Banana madura','1'],['Huevo','2'],['Harina de coco','2 cdas'],['Canela','1 cdita'],['Aceite de coco','1 cdita']],p:['Pisá la banana e incorporá los huevos.','Agregá la harina de coco y la canela. Mezclá.','Calentá la wafflera y aceitá ligeramente.','Cociná 4 minutos o hasta que estén dorados.']},
+{id:21,n:'Ensalada de frutas con menta',t:'desayuno',e:'🍇',bg:'rcp',k:155,m:'5 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Sandía','1 taza'],['Melón','1 taza'],['Uvas sin semilla','½ taza'],['Menta fresca','hojas'],['Limón','jugo de 1']],p:['Cortá todas las frutas en trozos similares.','Colocalas en un bol grande.','Rociá con jugo de limón.','Decorá con las hojas de menta y serví frío.']},
+{id:22,n:'Tostadas con salmón ahumado',t:'desayuno',e:'🐟',bg:'rcb',k:235,m:'5 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pan sin TACC','2 fetas'],['Salmón ahumado','60g'],['Queso crema light','2 cdas'],['Alcaparras','1 cdita'],['Eneldo','a gusto']],p:['Tostá el pan sin TACC.','Untá con el queso crema.','Colocá el salmón por encima.','Decorá con alcaparras y eneldo.']},
+{id:23,n:'Frutas horneadas con canela',t:'desayuno',e:'🍎',bg:'rcp',k:170,m:'20 min',ig:'Medio',tags:['Sin TACC'],i:[['Manzana','1'],['Pera','1'],['Canela','1 cdita'],['Miel','1 cda'],['Nueces picadas','20g']],p:['Cortá las frutas en mitades y colocalas en una fuente.','Rociá con miel y espolvoreá la canela.','Cociná en horno a 180°C por 15 minutos.','Serví con las nueces picadas encima.']},
+{id:24,n:'Burrito de desayuno sin gluten',t:'desayuno',e:'🌯',bg:'rca',k:270,m:'15 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Tortilla de maíz','1'],['Huevos','2'],['Frijoles negros sin TACC','3 cdas'],['Palta','¼'],['Tomate','¼']],p:['Revolvé los huevos en una sartén.','Calentá la tortilla en otra sartén.','Colocá los huevos, frijoles, palta y tomate sobre la tortilla.','Enrollá y serví de inmediato.']},
+{id:25,n:'Batido de mango y jengibre',t:'desayuno',e:'🥭',bg:'rca',k:185,m:'5 min',ig:'Medio',tags:['Sin TACC'],i:[['Mango','½'],['Leche de coco','200ml'],['Jengibre fresco','1 cm'],['Cúrcuma','¼ cdita'],['Hielo','a gusto']],p:['Cortá el mango en trozos.','Poné todos los ingredientes en la licuadora.','Procesá hasta obtener una mezcla suave.','Serví bien frío.']},
+{id:26,n:'Huevos rellenos',t:'desayuno',e:'🥚',bg:'rca',k:195,m:'15 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Huevos duros','3'],['Mayonesa light','1 cda'],['Mostaza','1 cdita'],['Pimentón','a gusto'],['Ciboulette','a gusto']],p:['Cortá los huevos duros al medio.','Retirá las yemas y pisalas con la mayonesa y mostaza.','Rellená las claras con la mezcla.','Espolvoreá con pimentón y ciboulette.']},
+{id:27,n:'Pancakes de ricota y avena',t:'desayuno',e:'🥞',bg:'rca',k:225,m:'15 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Ricota','100g'],['Avena sin TACC','3 cdas'],['Huevo','1'],['Miel','1 cdita'],['Canela','a gusto']],p:['Mezclá la ricota con el huevo y la miel.','Agregá la avena y la canela. Mezclá bien.','Cociná porciones en sartén a fuego bajo.','2-3 minutos por lado. Serví con frutas.']},
+{id:28,n:'Granola casera sin TACC',t:'desayuno',e:'🌾',bg:'rca',k:250,m:'25 min',ig:'Medio',tags:['Sin TACC'],i:[['Avena sin TACC','1 taza'],['Nueces picadas','¼ taza'],['Miel','2 cdas'],['Aceite de coco','1 cda'],['Canela','1 cdita']],p:['Mezclá la avena con nueces, canela, miel y aceite.','Extendé en placa de horno.','Cociná a 160°C por 20 minutos revolviendo a mitad.','Dejá enfriar y guardá en frasco hermético.']},
+{id:29,n:'Arepa de maíz con queso',t:'desayuno',e:'🫓',bg:'rca',k:240,m:'15 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Harina de maíz precocida','½ taza'],['Agua tibia','½ taza'],['Sal','a gusto'],['Queso fresco','50g'],['Aceite','1 cdita']],p:['Mezclá la harina con el agua y sal hasta obtener una masa.','Formá discos de 1 cm de grosor.','Cociná en sartén a fuego medio 5 minutos por lado.','Abrilas y rellená con el queso fresco.']},
+{id:30,n:'Ensalada mediterránea completa',t:'almuerzo',e:'🥗',bg:'rcv',k:280,m:'15 min',ig:'Bajo',tags:['Sin TACC','IG Bajo'],i:[['Lechuga','2 tazas'],['Tomate cherry','100g'],['Pepino','½'],['Aceitunas','30g'],['Atún al natural','1 lata'],['Aceite de oliva','1 cda'],['Limón','½']],p:['Lavá y cortá toda la lechuga.','Cortá el tomate y el pepino.','Mezclá con las aceitunas y el atún escurrido.','Aliñá con aceite de oliva y limón. Condimentá.']},
+{id:31,n:'Tarta de verduras sin TACC',t:'almuerzo',e:'🥧',bg:'rcv',k:310,m:'35 min',ig:'Bajo',tags:['Sin TACC'],i:[['Harina de arroz','200g'],['Huevos','3'],['Zapallito','2'],['Cebolla','1'],['Queso untable descremado','100g'],['Aceite','2 cdas']],p:['Mezclá harina con 2 huevos y aceite para la masa.','Estirá y colocá en molde enmantecado.','Sofreí la cebolla y el zapallito rallado.','Batí el huevo restante con queso y verduras. Volcá y cociná 25 min a 180°C.']},
+{id:32,n:'Pollo al limón con quinoa',t:'almuerzo',e:'🍋',bg:'rcv',k:340,m:'30 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Quinoa','½ taza'],['Limón','1'],['Ajo','2 dientes'],['Romero','a gusto'],['Aceite de oliva','1 cda']],p:['Marináte el pollo con limón, ajo y romero 15 min.','Cociná la quinoa en agua con sal 15 minutos.','Sellá el pollo en sartén caliente 5 min por lado.','Serví el pollo sobre la quinoa con jugo de limón.']},
+{id:33,n:'Sopa de lentejas',t:'almuerzo',e:'🍲',bg:'rcp',k:260,m:'40 min',ig:'Bajo-Medio',tags:['Sin TACC','Fibra'],i:[['Lentejas','1 taza'],['Zanahoria','1'],['Cebolla','½'],['Tomate','1'],['Caldo vegetal sin TACC','500ml'],['Comino','1 cdita']],p:['Remojá las lentejas 30 min.','Sofreí cebolla y zanahoria 5 minutos.','Agregá tomate, comino, lentejas y caldo.','Cociná 25 minutos a fuego bajo.']},
+{id:34,n:'Bowl de arroz con vegetales salteados',t:'almuerzo',e:'🍱',bg:'rcv',k:295,m:'25 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Arroz integral','½ taza'],['Brócoli','1 taza'],['Morrón','½'],['Cebolla','½'],['Salsa de soja sin gluten','1 cda'],['Ajo','1 diente']],p:['Cociná el arroz integral.','Salteá las verduras con ajo en wok o sartén grande.','Agregá la salsa de soja sin gluten.','Servíla sobre el arroz caliente.']},
+{id:35,n:'Merluza al horno con tomates',t:'almuerzo',e:'🐠',bg:'rcb',k:270,m:'25 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Merluza','200g'],['Tomate','1'],['Aceitunas','20g'],['Aceite de oliva','1 cda'],['Orégano','a gusto'],['Limón','½']],p:['Colocá el filet en una fuente.','Cubrí con rodajas de tomate y aceitunas.','Condimentá con orégano, aceite y limón.','Cociná en horno a 180°C por 20 minutos.']},
+{id:36,n:'Medallones de pollo con puré de zapallo',t:'almuerzo',e:'🍠',bg:'rca',k:320,m:'30 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Pechuga de pollo','200g'],['Zapallo','300g'],['Aceite de oliva','1 cda'],['Cúrcuma','½ cdita'],['Sal y pimienta','a gusto']],p:['Cociná el zapallo al vapor hasta tierno.','Pisalo con aceite, cúrcuma, sal y pimienta.','Cortá el pollo en medallones y sellá en sartén.','Serví los medallones sobre el puré de zapallo.']},
+{id:37,n:'Ensalada de garbanzos',t:'almuerzo',e:'🫘',bg:'rca',k:290,m:'10 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Garbanzos cocidos','1 taza'],['Pepino','½'],['Tomate cherry','8'],['Cebolla morada','¼'],['Aceite de oliva','1 cda'],['Perejil','a gusto']],p:['Escurrí y enjuagá los garbanzos.','Cortá todas las verduras.','Mezclá todo en un bol.','Condimentá con aceite, sal y perejil.']},
+{id:38,n:'Arroz con pollo a la cúrcuma',t:'almuerzo',e:'🍛',bg:'rca',k:350,m:'35 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Arroz blanco','½ taza'],['Pechuga de pollo','150g'],['Cebolla','½'],['Ajo','2 dientes'],['Cúrcuma','1 cdita'],['Caldo de pollo sin TACC','200ml']],p:['Sofreí cebolla y ajo. Agregá el pollo en cubos.','Cuando el pollo esté sellado, agregá el arroz.','Añadí la cúrcuma y el caldo caliente.','Cociná tapado a fuego bajo 18 minutos.']},
+{id:39,n:'Wok de vegetales con tofu',t:'almuerzo',e:'🥬',bg:'rcv',k:265,m:'20 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Tofu firme','150g'],['Brócoli','1 taza'],['Zanahoria','1'],['Hongos','½ taza'],['Salsa de soja sin gluten','1 cda'],['Jengibre','1 cm']],p:['Cortá el tofu en cubos y doralo en sartén.','Salteá las verduras con jengibre rallado.','Agregá el tofu y la salsa de soja sin gluten.','Servílo caliente sobre arroz blanco.']},
+{id:40,n:'Cazuela de pollo y vegetales',t:'almuerzo',e:'🫕',bg:'rca',k:310,m:'40 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Papa','1'],['Zanahoria','1'],['Arveja sin TACC','½ taza'],['Caldo sin TACC','300ml'],['Cebolla','1']],p:['Sofreí la cebolla y el pollo en cubos.','Agregá las verduras cortadas y el caldo.','Cociná tapado a fuego bajo 30 minutos.','Condimentá y serví caliente.']},
+{id:41,n:'Tabbouleh de quinoa',t:'almuerzo',e:'🌿',bg:'rcv',k:255,m:'20 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Quinoa cocida','1 taza'],['Pepino','½'],['Tomate','1'],['Perejil','½ taza'],['Aceite de oliva','1 cda'],['Limón','jugo de 1']],p:['Cociná y dejá enfriar la quinoa.','Picá finamente el pepino, tomate y perejil.','Mezclá todo con la quinoa.','Condimentá con aceite, limón, sal y pimienta.']},
+{id:42,n:'Hamburguesa de pollo sin gluten',t:'almuerzo',e:'🍔',bg:'rcv',k:330,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pollo picado','200g'],['Ajo en polvo','a gusto'],['Perejil','a gusto'],['Lechuga','hojas'],['Tomate','rodajas'],['Pan sin TACC','1']],p:['Mezclá el pollo picado con ajo y perejil.','Formá hamburguesas y cociná en sartén 5 min por lado.','Tostá el pan sin TACC.','Armá con lechuga, tomate y la hamburguesa.']},
+{id:43,n:'Pasta de arroz con salsa de tomate',t:'almuerzo',e:'🍝',bg:'rcp',k:345,m:'20 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Pasta de arroz sin TACC','80g'],['Tomate triturado','½ taza'],['Ajo','2 dientes'],['Albahaca','hojas'],['Aceite de oliva','1 cda'],['Sal','a gusto']],p:['Cociná la pasta según el paquete.','Sofreí el ajo y agregá el tomate.','Cociná la salsa 10 minutos a fuego bajo.','Mezclá con la pasta y decorá con albahaca.']},
+{id:44,n:'Salmón a la plancha con vegetales',t:'almuerzo',e:'🐟',bg:'rcb',k:360,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Salmón','200g'],['Espárragos','6'],['Zanahoria baby','6'],['Aceite de oliva','1 cda'],['Limón','½'],['Sal y pimienta','a gusto']],p:['Sazonáel salmón con sal, pimienta y limón.','Cociná en sartén caliente 4 minutos por lado.','Mientras tanto, salteá los vegetales.','Serví el salmón sobre los vegetales.']},
+{id:45,n:'Ensalada de pollo y palta',t:'almuerzo',e:'🥑',bg:'rcv',k:315,m:'15 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo cocida','150g'],['Palta','½'],['Tomate cherry','8'],['Lechuga','2 tazas'],['Limón','1'],['Aceite de oliva','1 cda']],p:['Cortá el pollo cocido en tiras.','Cortá la palta y los tomates.','Mezclá sobre la lechuga.','Aliñá con aceite y limón. Condimentá.']},
+{id:46,n:'Estofado de carne con vegetales',t:'almuerzo',e:'🥩',bg:'rcp',k:340,m:'50 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Carne magra de res','180g'],['Papa','1'],['Zanahoria','1'],['Cebolla','1'],['Tomate','1'],['Caldo sin TACC','200ml']],p:['Cortá la carne en cubos y sellá en olla.','Agregá cebolla y tomate picados.','Sumá papa, zanahoria y caldo.','Cociná tapado a fuego muy bajo 45 minutos.']},
+{id:47,n:'Bowl de atún y arroz',t:'almuerzo',e:'🐟',bg:'rcb',k:300,m:'15 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Atún al natural','1 lata'],['Arroz blanco cocido','½ taza'],['Maíz sin TACC','3 cdas'],['Tomate','½'],['Aceite de oliva','1 cdita']],p:['Cociná el arroz blanco.','Escurrí el atún y mezclá con el maíz.','Incorporá el tomate picado.','Servílo sobre el arroz con aceite y limón.']},
+{id:48,n:'Tortilla de verduras',t:'almuerzo',e:'🥚',bg:'rca',k:285,m:'20 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Huevos','3'],['Cebolla','½'],['Morrón','½'],['Espinaca','½ taza'],['Aceite','1 cda'],['Sal y pimienta','a gusto']],p:['Sofreí la cebolla y el morrón picados.','Agregá la espinaca y cociná hasta que reduzca.','Batí los huevos y volcá sobre las verduras.','Cociná a fuego bajo tapada hasta que cuaje.']},
+{id:49,n:'Pollo al curry con arroz de coliflor',t:'almuerzo',e:'🍛',bg:'rca',k:295,m:'30 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Coliflor rallada','2 tazas'],['Leche de coco','100ml'],['Curry','1 cdita'],['Cebolla','½'],['Ajo','2 dientes']],p:['Sofreí cebolla y ajo, agregá el pollo en cubos.','Añadí el curry y la leche de coco.','Cociná 20 minutos a fuego bajo.','Salteá la coliflor rallada como sustituto del arroz.']},
+{id:50,n:'Caldo con fideos sin TACC',t:'almuerzo',e:'🍜',bg:'rcb',k:240,m:'30 min',ig:'Bajo',tags:['Sin TACC'],i:[['Fideos de arroz','80g'],['Zanahoria','1'],['Apio','1 tallo'],['Cebolla','½'],['Caldo sin TACC','600ml'],['Perejil','a gusto']],p:['Sofreí las verduras en una olla.','Agregá el caldo caliente.','Cociná 15 minutos. Agregá los fideos.','Cociná según paquete. Serví con perejil.']},
+{id:51,n:'Pechuga rellena con espinaca',t:'almuerzo',e:'🍗',bg:'rcv',k:320,m:'35 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Espinaca','1 taza'],['Queso fresco','50g'],['Ajo','1 diente'],['Aceite','1 cda'],['Sal y pimienta','a gusto']],p:['Abrí la pechuga formando un bolsillo.','Sofreí la espinaca con ajo.','Rellená la pechuga con espinaca y queso.','Asegurá con palillos y cociná en horno 25 min a 180°C.']},
+{id:52,n:'Ensalada de remolacha y queso',t:'almuerzo',e:'🫙',bg:'rcp',k:270,m:'10 min',ig:'Bajo-Medio',tags:['Sin TACC','Vegetariano'],i:[['Remolacha cocida','2'],['Queso fresco','60g'],['Rúcula','1 taza'],['Nueces','20g'],['Aceite de oliva','1 cda'],['Vinagre balsámico','1 cdita']],p:['Cortá la remolacha en cubos.','Desmenuzá el queso fresco.','Armá sobre la rúcula.','Rociá con aceite y vinagre. Agregá nueces.']},
+{id:53,n:'Milanesa de pollo sin TACC',t:'almuerzo',e:'🍗',bg:'rca',k:350,m:'25 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Pan rallado sin TACC','½ taza'],['Huevo','1'],['Ajo en polvo','a gusto'],['Aceite','para freir'],['Limón','para servir']],p:['Aplaná las pechugas.','Pasalas por huevo batido y luego por pan rallado sin TACC.','Freilas en aceite caliente 4 min por lado.','Serví con limón exprimido y ensalada.']},
+{id:54,n:'Lentejas estofadas',t:'almuerzo',e:'🫘',bg:'rca',k:290,m:'45 min',ig:'Bajo-Medio',tags:['Sin TACC','Vegetariano'],i:[['Lentejas','1 taza'],['Tomate triturado','½ taza'],['Cebolla','1'],['Ajo','2 dientes'],['Pimentón dulce','1 cdita'],['Aceite de oliva','1 cda']],p:['Remojá las lentejas 30 minutos.','Sofreí cebolla y ajo. Agregá el tomate.','Sumá las lentejas escurridas y agua.','Cociná 30 minutos hasta tiernas. Condimentá.']},
+{id:55,n:'Wrap de lechuga con pollo',t:'almuerzo',e:'🥬',bg:'rcv',k:255,m:'15 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Hojas de lechuga grande','4'],['Pechuga cocida','150g'],['Palta','¼'],['Tomate','½'],['Queso crema light','1 cda']],p:['Cortá el pollo en tiras.','Pisá la palta con limón y sal.','Untá las hojas de lechuga con queso crema.','Rellená con pollo, palta y tomate. Enrollá.']},
+{id:56,n:'Paella de mariscos sin TACC',t:'almuerzo',e:'🦐',bg:'rcb',k:360,m:'40 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Arroz blanco','½ taza'],['Mejillones','8'],['Calamares','100g'],['Cebolla','½'],['Pimentón','1'],['Azafrán','a gusto']],p:['Sofreí la cebolla y el pimentón.','Agregá los mariscos y sellá.','Añadí el arroz y el caldo caliente con azafrán.','Cociná tapado 18 minutos a fuego bajo.']},
+{id:57,n:'Hamburguesa de lentejas',t:'almuerzo',e:'🍔',bg:'rcv',k:285,m:'25 min',ig:'Bajo-Medio',tags:['Sin TACC','Vegetariano'],i:[['Lentejas cocidas','1 taza'],['Harina de garbanzo','3 cdas'],['Cebolla','¼'],['Ajo','1 diente'],['Comino','½ cdita'],['Aceite','1 cda']],p:['Pisá las lentejas dejando textura.','Mezclá con harina, cebolla picada, ajo y comino.','Formá hamburguesas y cociná en sartén aceitada.','4-5 minutos por lado. Serví con ensalada.']},
+{id:58,n:'Pollo al horno con papas',t:'almuerzo',e:'🥔',bg:'rca',k:380,m:'45 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Muslos de pollo','2'],['Papa','2 medianas'],['Romero','a gusto'],['Ajo','3 dientes'],['Aceite de oliva','2 cdas'],['Sal y pimienta','a gusto']],p:['Cortá las papas en gajos.','Mezclá el pollo y las papas con aceite, ajo y romero.','Colocá en fuente para horno.','Cociná a 200°C por 40 minutos.']},
+{id:59,n:'Ensalada de pasta sin TACC',t:'almuerzo',e:'🍝',bg:'rcp',k:310,m:'20 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Pasta de arroz','80g'],['Tomate cherry','10'],['Aceitunas','20g'],['Albahaca','hojas'],['Aceite de oliva','1 cda']],p:['Cociná la pasta según el paquete y enfriá.','Cortá los tomates por la mitad.','Mezclá todo en un bol.','Condimentá con aceite, sal y albahaca.']},
+{id:60,n:'Bowl de frutas y semillas',t:'merienda',e:'🫐',bg:'rcb',k:150,m:'5 min',ig:'Medio',tags:['Sin TACC'],i:[['Banana','1'],['Frutillas','100g'],['Semillas de chía','1 cda'],['Semillas de girasol','1 cda'],['Miel','1 cdita']],p:['Cortá la banana en rodajas y las frutillas.','Colocá en un bol.','Esparcí las semillas encima.','Rociá con miel si lo preferís.']},
+{id:61,n:'Licuado verde antioxidante',t:'merienda',e:'🥤',bg:'rcv',k:120,m:'5 min',ig:'Bajo',tags:['Sin TACC'],i:[['Espinaca baby','1 taza'],['Pepino','½'],['Manzana verde','1'],['Jengibre','1 cm'],['Agua','200ml']],p:['Lavá bien todos los ingredientes.','Cortá la manzana sin semillas.','Procesá todo en licuadora.','Serví bien frío con hielo.']},
+{id:62,n:'Manzana con mantequilla de almendras',t:'merienda',e:'🍎',bg:'rca',k:145,m:'2 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Manzana','1'],['Mantequilla de almendras','1 cda'],['Canela','a gusto']],p:['Cortá la manzana en gajos.','Servílos con la mantequilla para untar.','Espolvoreá con canela.']},
+{id:63,n:'Galletas de avena y banana',t:'merienda',e:'🍪',bg:'rca',k:165,m:'20 min',ig:'Medio',tags:['Sin TACC'],i:[['Avena sin TACC','1 taza'],['Banana madura','1'],['Canela','1 cdita'],['Chispas de chocolate amargo','20g']],p:['Pisá la banana e incorporá la avena y canela.','Agregá las chispas de chocolate.','Formá galletas y colocá en placa.','Horneá a 180°C por 12 minutos.']},
+{id:64,n:'Yogur con granola y miel',t:'merienda',e:'🫙',bg:'rcp',k:195,m:'3 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Yogur griego natural','150g'],['Granola sin TACC','2 cdas'],['Miel','1 cdita'],['Canela','a gusto']],p:['Colocá el yogur en un vaso o bol.','Agregá la granola sin TACC.','Rociá con miel.','Espolvoreá canela y serví.']},
+{id:65,n:'Hummus con bastones de verdura',t:'merienda',e:'🫘',bg:'rcv',k:170,m:'10 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Garbanzos cocidos','½ taza'],['Tahini','1 cda'],['Limón','½'],['Ajo','1 diente'],['Zanahoria','1'],['Apio','2 tallos']],p:['Procesá los garbanzos con tahini, limón y ajo.','Agregá agua poco a poco hasta obtener textura cremosa.','Cortá zanahoria y apio en bastones.','Serví el hummus con los bastones para mojar.']},
+{id:66,n:'Tostadas con palta y semillas',t:'merienda',e:'🥑',bg:'rcv',k:185,m:'5 min',ig:'Bajo',tags:['Sin TACC'],i:[['Tostadas de arroz','2'],['Palta','¼'],['Semillas de sésamo','1 cdita'],['Limón','unas gotas'],['Sal','a gusto']],p:['Pisá la palta con limón y sal.','Untá las tostadas de arroz.','Espolvoreá las semillas de sésamo.','Serví de inmediato.']},
+{id:67,n:'Batido de chocolate y banana',t:'merienda',e:'🍫',bg:'rca',k:200,m:'5 min',ig:'Medio',tags:['Sin TACC'],i:[['Banana congelada','1'],['Cacao amargo en polvo','1 cda'],['Leche descremada','200ml'],['Miel','1 cdita']],p:['Poné todos los ingredientes en la licuadora.','Procesá hasta obtener una mezcla suave.','Probá el dulzor y ajustá con miel.','Serví bien frío.']},
+{id:68,n:'Muffins de arándanos sin TACC',t:'merienda',e:'🫐',bg:'rcb',k:180,m:'25 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Harina de almendras','1 taza'],['Huevos','2'],['Miel','2 cdas'],['Arándanos','½ taza'],['Aceite de coco','2 cdas'],['Polvo de hornear sin TACC','1 cdita']],p:['Mezclá los ingredientes húmedos.','Incorporá la harina y el polvo de hornear.','Agregá los arándanos suavemente.','Cociná en molde a 175°C por 20 minutos.']},
+{id:69,n:'Fruta de estación con ricota',t:'merienda',e:'🍓',bg:'rcp',k:155,m:'3 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Ricota descremada','100g'],['Kiwi','1'],['Frutillas','50g'],['Miel','1 cdita']],p:['Colocá la ricota en un bol.','Cortá las frutas en trozos.','Colocalas sobre la ricota.','Rociá con miel y serví.']},
+{id:70,n:'Palitos de apio con queso crema',t:'merienda',e:'🥬',bg:'rcv',k:130,m:'3 min',ig:'Bajo',tags:['Sin TACC'],i:[['Apio','3 tallos'],['Queso crema light','2 cdas'],['Sal y pimienta','a gusto']],p:['Lavá y cortá el apio en bastones.','Mezclá el queso crema con sal y pimienta.','Untá cada palito con el queso.','Serví de inmediato.']},
+{id:71,n:'Chips de batata horneados',t:'merienda',e:'🍠',bg:'rca',k:160,m:'25 min',ig:'Medio',tags:['Sin TACC'],i:[['Batata','1 grande'],['Aceite de oliva','1 cda'],['Pimentón','½ cdita'],['Sal','a gusto']],p:['Cortá la batata en rodajas muy finas.','Mezclá con aceite, pimentón y sal.','Extendé en placa de horno.','Cociná a 200°C por 20 minutos, dando vuelta a mitad.']},
+{id:72,n:'Gelatina con frutas frescas',t:'merienda',e:'🍮',bg:'rcp',k:85,m:'5 min + reposo',ig:'Bajo',tags:['Sin TACC'],i:[['Gelatina sin azúcar','1 sobre'],['Agua caliente','250ml'],['Agua fría','250ml'],['Durazno','1'],['Kiwi','1']],p:['Disolvé la gelatina en agua caliente.','Agregá el agua fría y mezclá.','Cortá las frutas y colocalas en moldes.','Volcá la gelatina y refrigerá 3 horas.']},
+{id:73,n:'Mix de frutos secos',t:'merienda',e:'🥜',bg:'rca',k:175,m:'1 min',ig:'Bajo',tags:['Sin TACC'],i:[['Almendras','15g'],['Nueces','15g'],['Maní sin sal','15g']],p:['Medí las porciones.','Mezclá los frutos secos.','Serví en un bol pequeño.']},
+{id:74,n:'Smoothie de mango y cúrcuma',t:'merienda',e:'🥭',bg:'rca',k:165,m:'5 min',ig:'Medio',tags:['Sin TACC'],i:[['Mango','½'],['Leche de almendras','200ml'],['Cúrcuma','¼ cdita'],['Jengibre','pizca'],['Miel','1 cdita']],p:['Congelá el mango previamente.','Procesá todos los ingredientes.','Ajustá la consistencia con más leche.','Serví frío.']},
+{id:75,n:'Tortitas de maíz con queso',t:'merienda',e:'🌽',bg:'rca',k:180,m:'10 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Tortitas de maíz sin TACC','3'],['Queso untable light','2 cdas'],['Tomate cherry','4'],['Orégano','a gusto']],p:['Untá las tortitas con queso.','Cortá los tomates y colocalos encima.','Espolvoreá el orégano.','Serví de inmediato.']},
+{id:76,n:'Batido proteico de vainilla',t:'merienda',e:'🥛',bg:'rcb',k:190,m:'3 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Leche descremada','250ml'],['Ricota','50g'],['Extracto de vainilla','½ cdita'],['Canela','a gusto'],['Stevia','a gusto']],p:['Poné todos los ingredientes en la licuadora.','Procesá hasta que quede cremoso.','Ajustá el dulzor con stevia.','Serví con hielo.']},
+{id:77,n:'Dip de berenjena asada',t:'merienda',e:'🍆',bg:'rcv',k:140,m:'30 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Berenjena','1'],['Tahini','1 cda'],['Limón','½'],['Ajo','1 diente'],['Pimentón ahumado','½ cdita'],['Perejil','a gusto']],p:['Asá la berenjena entera al horno a 200°C por 25 min.','Retirá la piel y procesá la pulpa.','Agregá tahini, limón y ajo. Procesá.','Serví con bastones de verdura o tostadas sin TACC.']},
+{id:78,n:'Peras horneadas con canela',t:'merienda',e:'🍐',bg:'rca',k:130,m:'20 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Peras','2'],['Canela','1 cdita'],['Miel','1 cda'],['Nueces picadas','15g']],p:['Cortá las peras al medio.','Rociá con miel y espolvoreá canela.','Hornéalas a 180°C por 15 minutos.','Serví con nueces picadas encima.']},
+{id:79,n:'Budín de banana sin azúcar',t:'merienda',e:'🍌',bg:'rca',k:195,m:'35 min',ig:'Medio',tags:['Sin TACC'],i:[['Banana madura','3'],['Huevos','2'],['Harina de arroz','1 taza'],['Aceite de coco','2 cdas'],['Canela','1 cdita'],['Polvo hornear sin TACC','1 cdita']],p:['Pisá las bananas e incorporá los huevos.','Agregá la harina, aceite y canela.','Volcá en molde de budín aceitado.','Horneá a 175°C por 30 minutos.']},
+{id:80,n:'Rollitos de jamón y queso',t:'merienda',e:'🌯',bg:'rcb',k:150,m:'5 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Jamón cocido bajo en sodio','3 fetas'],['Queso fresco','40g'],['Pepino','½'],['Mostaza','a gusto']],p:['Extendé las fetas de jamón.','Colocá un trozo de queso y pepino en bastón.','Untá con un poco de mostaza.','Enrollá firmemente y serví.']},
+{id:81,n:'Naranjas con canela',t:'merienda',e:'🍊',bg:'rca',k:100,m:'3 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Naranjas','2'],['Canela','a gusto']],p:['Pelá y cortá las naranjas en rodajas.','Colocalas en un plato.','Espolvoreá con canela y serví.']},
+{id:82,n:'Crackers caseros de semillas',t:'merienda',e:'🫘',bg:'rca',k:170,m:'25 min',ig:'Bajo',tags:['Sin TACC'],i:[['Semillas de girasol','¼ taza'],['Semillas de lino','¼ taza'],['Semillas de sésamo','¼ taza'],['Agua','3 cdas'],['Sal','a gusto']],p:['Mezclá todas las semillas con sal y agua.','Extendé la mezcla fina sobre papel manteca.','Cociná a 160°C por 20 minutos.','Dejá enfriar y partí en trozos.']},
+{id:83,n:'Batido de frutillas y yogur',t:'merienda',e:'🍓',bg:'rcp',k:145,m:'3 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Frutillas','150g'],['Yogur natural sin azúcar','100g'],['Leche descremada','100ml'],['Miel','1 cdita']],p:['Lavá las frutillas.','Procesá todo en licuadora.','Probá el dulzor y ajustá.','Serví bien frío.']},
+{id:84,n:'Palomitas de maíz caseras',t:'merienda',e:'🍿',bg:'rca',k:140,m:'10 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Maíz para pochoclo','3 cdas'],['Aceite de coco','1 cdita'],['Sal','a gusto'],['Pimentón dulce','½ cdita']],p:['Calentá el aceite en una olla tapada.','Agregá el maíz y tapá.','Agitá la olla de vez en cuando hasta que deje de explotar.','Condimentá con sal y pimentón.']},
+{id:85,n:'Cuadraditos de avena',t:'merienda',e:'🟫',bg:'rca',k:185,m:'20 min',ig:'Medio',tags:['Sin TACC'],i:[['Avena sin TACC','1 taza'],['Miel','2 cdas'],['Mantequilla de maní','2 cdas'],['Banana','½'],['Canela','1 cdita']],p:['Mezclá todos los ingredientes.','Presioná la mezcla en una fuente.','Refrigerá 30 minutos o cociná a 170°C por 15 min.','Cortá en cuadrados y serví.']},
+{id:86,n:'Sopa fría de pepino',t:'merienda',e:'🥒',bg:'rcv',k:95,m:'10 min',ig:'Bajo',tags:['Sin TACC'],i:[['Pepino','1'],['Yogur natural','100g'],['Menta','hojas'],['Ajo','½ diente'],['Sal y pimienta','a gusto'],['Limón','½']],p:['Pelá y cortá el pepino.','Procesá con el yogur, menta y ajo.','Condimentá con limón, sal y pimienta.','Serví bien frío.']},
+{id:87,n:'Brownie de cacao y remolacha',t:'merienda',e:'🍫',bg:'rcp',k:195,m:'30 min',ig:'Bajo-Medio',tags:['Sin TACC'],i:[['Remolacha cocida','1 taza'],['Cacao amargo','3 cdas'],['Huevos','2'],['Harina de almendras','½ taza'],['Miel','2 cdas'],['Aceite de coco','1 cda']],p:['Procesá la remolacha hasta hacer un puré.','Mezclá con todos los demás ingredientes.','Volcá en molde aceitado.','Cociná a 175°C por 22 minutos.']},
+{id:88,n:'Melón con jamón crudo',t:'merienda',e:'🍈',bg:'rcp',k:130,m:'5 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Melón','½ taza'],['Jamón crudo sin TACC','40g'],['Rúcula','½ taza'],['Aceite de oliva','1 cdita'],['Pimienta','a gusto']],p:['Cortá el melón en cubos.','Desmenuzá el jamón crudo.','Colocá sobre la rúcula.','Rociá con aceite y pimienta negra.']},
+{id:89,n:'Licuado de durazno y canela',t:'merienda',e:'🍑',bg:'rca',k:145,m:'5 min',ig:'Medio',tags:['Sin TACC'],i:[['Durazno','1 grande'],['Leche descremada','200ml'],['Canela','½ cdita'],['Vainilla','unas gotas'],['Hielo','3 cubos']],p:['Pelá y cortá el durazno.','Licuá con la leche, canela, vainilla y hielo.','Procesá hasta que quede suave.','Serví de inmediato.']},
+{id:90,n:'Sopa de pollo casera',t:'cena',e:'🍗',bg:'rca',k:240,m:'35 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','150g'],['Zanahoria','1'],['Apio','1 tallo'],['Cebolla','½'],['Fideos de arroz','50g'],['Caldo sin TACC','600ml']],p:['Cociná la verdura con el caldo 15 min.','Agregá el pollo en tiras y seguí cocinando.','Sumá los fideos de arroz al final.','Cociná según el paquete. Condimentá.']},
+{id:91,n:'Tortilla española ligera',t:'cena',e:'🥔',bg:'rca',k:260,m:'20 min',ig:'Medio',tags:['Sin TACC','Vegetariano'],i:[['Huevos','3'],['Papa','1 mediana'],['Cebolla','½'],['Aceite de oliva','1 cda'],['Sal','a gusto']],p:['Cociná la papa en rodajas finas en aceite.','Sofreí la cebolla hasta tierna.','Batí los huevos y mezclá con papa y cebolla.','Cociná a fuego bajo tapada 8 min de cada lado.']},
+{id:92,n:'Crema de calabaza',t:'cena',e:'🎃',bg:'rca',k:195,m:'30 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Calabaza','400g'],['Cebolla','½'],['Caldo vegetal sin TACC','400ml'],['Nuez moscada','a gusto'],['Aceite de oliva','1 cda'],['Sal','a gusto']],p:['Sofreí la cebolla y agregá la calabaza en cubos.','Cubrí con el caldo y cociná 20 min.','Procesá hasta obtener una crema.','Condimentá con nuez moscada y sal.']},
+{id:93,n:'Merluza a la plancha con ensalada',t:'cena',e:'🐟',bg:'rcb',k:250,m:'15 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Merluza','200g'],['Lechuga','2 tazas'],['Tomate','1'],['Aceite de oliva','1 cda'],['Limón','1']],p:['Condimentá el pescado con sal y limón.','Cociná a la plancha 4 min por lado.','Preparáuna ensalada con lechuga y tomate.','Serví el pescado con la ensalada.']},
+{id:94,n:'Pollo al horno con verduras',t:'cena',e:'🍗',bg:'rcv',k:310,m:'40 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Calabacín','1'],['Morrón','1'],['Cebolla','1'],['Aceite de oliva','1 cda'],['Romero y tomillo','a gusto']],p:['Cortá todas las verduras en trozos.','Condimentá el pollo con aceite y hierbas.','Acomodá el pollo y verduras en fuente.','Cociná a 185°C por 35 minutos.']},
+{id:95,n:'Sopa de verduras',t:'cena',e:'🥣',bg:'rcv',k:180,m:'30 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Zanahoria','1'],['Zapallo','200g'],['Papa','½'],['Cebolla','½'],['Caldo vegetal sin TACC','500ml'],['Perejil','a gusto']],p:['Cortá todas las verduras en cubos.','Sofreí la cebolla brevemente.','Agregá las verduras y el caldo.','Cociná 25 minutos y condimentá con perejil.']},
+{id:96,n:'Omelette de champiñones',t:'cena',e:'🍄',bg:'rcv',k:220,m:'15 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Huevos','2'],['Champiñones','150g'],['Cebolla de verdeo','2'],['Queso fresco','30g'],['Aceite','1 cdita'],['Sal y pimienta','a gusto']],p:['Sofreí los champiñones y la cebolla.','Batí los huevos con sal y pimienta.','Volcá sobre los champiñones.','Agregá el queso y doblá cuando cuaje.']},
+{id:97,n:'Cazuela de vegetales',t:'cena',e:'🫕',bg:'rcv',k:215,m:'35 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Calabacín','1'],['Berenjena','½'],['Tomate','2'],['Cebolla','1'],['Ajo','2 dientes'],['Aceite de oliva','1 cda']],p:['Cortá todas las verduras en cubos.','Sofreí el ajo y la cebolla.','Agregá el resto de las verduras.','Cociná tapado 25 minutos a fuego bajo.']},
+{id:98,n:'Pescado al vapor con vegetales',t:'cena',e:'🐠',bg:'rcb',k:235,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Filet de pescado blanco','200g'],['Brócoli','1 taza'],['Zanahoria','1'],['Limón','½'],['Sal y hierbas','a gusto']],p:['Condimentá el pescado con limón y hierbas.','Cociná al vapor 12 minutos.','Mientras tanto cociná los vegetales al vapor.','Serví todo junto.']},
+{id:99,n:'Guiso de arroz y lentejas',t:'cena',e:'🍲',bg:'rca',k:285,m:'40 min',ig:'Bajo-Medio',tags:['Sin TACC','Vegetariano'],i:[['Arroz','¼ taza'],['Lentejas','¼ taza'],['Cebolla','½'],['Tomate','1'],['Comino','1 cdita'],['Caldo sin TACC','400ml']],p:['Sofreí la cebolla y el tomate.','Agregá las lentejas remojadas.','Sumá el arroz y el caldo caliente.','Cociná tapado 30 minutos. Condimentá con comino.']},
+{id:100,n:'Pollo salteado con brócoli',t:'cena',e:'🥦',bg:'rcv',k:280,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','180g'],['Brócoli','2 tazas'],['Ajo','2 dientes'],['Salsa de soja sin gluten','1 cda'],['Aceite de sésamo','1 cdita'],['Jengibre','1 cm']],p:['Cortá el pollo y brócoli en trozos.','Saltéalos con ajo y jengibre en wok.','Agregá la salsa de soja y el aceite de sésamo.','Cociná a fuego fuerte 3 minutos más.']},
+{id:101,n:'Crema de zanahoria y jengibre',t:'cena',e:'🥕',bg:'rca',k:180,m:'25 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Zanahoria','4'],['Jengibre fresco','2 cm'],['Cebolla','½'],['Caldo vegetal sin TACC','400ml'],['Leche de coco','50ml'],['Aceite','1 cda']],p:['Sofreí la cebolla y el jengibre rallado.','Agregá las zanahorias en trozos y el caldo.','Cociná 20 minutos hasta tiernas.','Procesá y terminá con la leche de coco.']},
+{id:102,n:'Tiras de pollo con morrón',t:'cena',e:'🍗',bg:'rcv',k:295,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Morrón','1'],['Cebolla','1'],['Ajo','2 dientes'],['Pimentón','1 cdita'],['Aceite','1 cda']],p:['Cortá el pollo en tiras.','Sofreí el ajo, cebolla y morrón.','Agregá el pollo y el pimentón.','Cociná 12 minutos revolviendo. Condimentá.']},
+{id:103,n:'Caldo de pollo con fideos',t:'cena',e:'🍵',bg:'rca',k:145,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Caldo de pollo sin TACC','500ml'],['Fideos de arroz','40g'],['Zanahoria rallada','½'],['Ciboulette','a gusto'],['Sal','a gusto']],p:['Calentá el caldo.','Agregá los fideos de arroz.','Cociná según el paquete.','Serví con zanahoria rallada y ciboulette.']},
+{id:104,n:'Berenjenas rellenas al horno',t:'cena',e:'🍆',bg:'rcv',k:255,m:'35 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Berenjenas','2'],['Tomate triturado','½ taza'],['Cebolla','½'],['Queso rallado sin TACC','30g'],['Ajo','2 dientes'],['Orégano','a gusto']],p:['Cortá las berenjenas al medio y vaciá un poco.','Sofreí la cebolla, ajo y la pulpa de berenjena.','Agregá el tomate y cociná 5 minutos.','Rellená, cubrí con queso y horneá 20 min a 190°C.']},
+{id:105,n:'Ensalada de huevo y atún',t:'cena',e:'🥚',bg:'rcb',k:265,m:'15 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Huevos duros','2'],['Atún al natural','1 lata'],['Lechuga','2 tazas'],['Tomate','1'],['Mayonesa light','1 cda'],['Limón','a gusto']],p:['Cociná los huevos duros y cortá en cuartos.','Escurrí el atún.','Armá la ensalada con lechuga, tomate, huevo y atún.','Aliñá con mayonesa light y limón.']},
+{id:106,n:'Guiso de pollo y zapallo',t:'cena',e:'🎃',bg:'rca',k:300,m:'40 min',ig:'Bajo-Medio',tags:['Sin TACC','Proteínas'],i:[['Pollo','200g'],['Zapallo','300g'],['Cebolla','1'],['Tomate','1'],['Caldo sin TACC','200ml'],['Ajo','2 dientes']],p:['Sofreí cebolla y ajo. Agregá el pollo.','Incorporá el zapallo en cubos y el tomate.','Cubrí con caldo y cociná tapado.','Cociná 30 minutos hasta que todo esté tierno.']},
+{id:107,n:'Tarta de espinaca y ricota',t:'cena',e:'🥬',bg:'rcv',k:295,m:'40 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Harina de arroz','200g'],['Espinaca','2 tazas'],['Ricota','200g'],['Huevos','2'],['Nuez moscada','a gusto'],['Aceite','2 cdas']],p:['Preparáuna masa con harina, 1 huevo y aceite.','Sofreí la espinaca y mezclá con ricota y huevo.','Condimentá con nuez moscada.','Armá la tarta y cociná 25 min a 180°C.']},
+{id:108,n:'Lomo de cerdo con puré de coliflor',t:'cena',e:'🥩',bg:'rca',k:310,m:'35 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Lomo de cerdo','180g'],['Coliflor','1 taza'],['Ajo','2 dientes'],['Aceite de oliva','1 cda'],['Limón','½'],['Sal y pimienta','a gusto']],p:['Cociná la coliflor al vapor hasta tierna.','Procesá con aceite y sal para el puré.','Condimentá el lomo con ajo, limón y pimienta.','Cociná a la plancha 5 min por lado.']},
+{id:109,n:'Crema de arvejas con menta',t:'cena',e:'🫛',bg:'rcv',k:210,m:'25 min',ig:'Bajo-Medio',tags:['Sin TACC','Vegetariano'],i:[['Arvejas sin TACC','2 tazas'],['Cebolla','½'],['Caldo vegetal','400ml'],['Menta fresca','hojas'],['Aceite de oliva','1 cda']],p:['Sofreí la cebolla brevemente.','Agregá las arvejas y el caldo.','Cociná 15 minutos.','Procesá con la menta y condimentá.']},
+{id:110,n:'Wrap de lechuga con salmón',t:'cena',e:'🐟',bg:'rcb',k:260,m:'10 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Salmón ahumado','80g'],['Hojas de lechuga','4'],['Palta','¼'],['Pepino','½'],['Queso crema light','1 cda']],p:['Pisá la palta con limón.','Untá las hojas de lechuga con queso crema.','Colocá el salmón, palta y pepino.','Enrollá y serví de inmediato.']},
+{id:111,n:'Pollo al vino blanco',t:'cena',e:'🍾',bg:'rcv',k:305,m:'35 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Muslos de pollo','2'],['Vino blanco sin TACC','100ml'],['Cebolla','1'],['Ajo','3 dientes'],['Tomillo','a gusto'],['Aceite de oliva','1 cda']],p:['Sellá los muslos en aceite.','Sofreí la cebolla y el ajo.','Agregá el vino y el tomillo.','Cociná tapado 25 minutos a fuego bajo.']},
+{id:112,n:'Fideos de calabacín salteados',t:'cena',e:'🥒',bg:'rcv',k:185,m:'15 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Calabacín','2'],['Tomate cherry','10'],['Ajo','2 dientes'],['Albahaca','hojas'],['Aceite de oliva','1 cda']],p:['Hacé fideos del calabacín con un espiralizador o pelador.','Sofreí el ajo en aceite.','Agregá los tomates y los fideos de calabacín.','Cociná 3 minutos y terminá con albahaca.']},
+{id:113,n:'Peceto con vegetales asados',t:'cena',e:'🥩',bg:'rcp',k:320,m:'45 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Peceto','180g'],['Morrón','1'],['Zapallito','2'],['Cebolla morada','1'],['Aceite de oliva','1 cda'],['Romero','a gusto']],p:['Cortá los vegetales y condimentá con aceite y romero.','Asá en el horno a 200°C por 20 minutos.','Cociná el peceto a la plancha.','Serví la carne con los vegetales asados.']},
+{id:114,n:'Sopa de tomate casera',t:'cena',e:'🍅',bg:'rcp',k:175,m:'25 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Tomates maduros','4'],['Cebolla','½'],['Ajo','2 dientes'],['Caldo vegetal','300ml'],['Albahaca','hojas'],['Aceite de oliva','1 cda']],p:['Asálos tomates, cebolla y ajo al horno.','Procesá con el caldo.','Cociná la crema 10 minutos.','Serví con albahaca fresca.']},
+{id:115,n:'Brochetas de pollo y vegetales',t:'cena',e:'🍢',bg:'rcv',k:285,m:'25 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Morrón','1'],['Cebolla','1'],['Champiñones','6'],['Aceite y limón','1 cda cada uno'],['Sal y hierbas','a gusto']],p:['Cortá pollo y verduras en trozos similares.','Marinálos con aceite, limón y hierbas.','Ensartá en palitos de brocheta alternando.','Cociná a la plancha 10 minutos girando.']},
+{id:116,n:'Crema de batata y jengibre',t:'cena',e:'🍠',bg:'rca',k:200,m:'30 min',ig:'Medio',tags:['Sin TACC','Vegetariano'],i:[['Batata','2'],['Jengibre','2 cm'],['Caldo vegetal sin TACC','400ml'],['Leche de coco','50ml'],['Cebolla','½'],['Aceite','1 cda']],p:['Sofreí la cebolla y el jengibre.','Agregá la batata en cubos y el caldo.','Cociná 20 minutos hasta tierna.','Procesá y terminá con leche de coco.']},
+{id:117,n:'Pollo con champiñones',t:'cena',e:'🍄',bg:'rcv',k:295,m:'25 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Pechuga de pollo','200g'],['Champiñones','200g'],['Cebolla','½'],['Caldo sin TACC','100ml'],['Perejil','a gusto'],['Aceite','1 cda']],p:['Cortá el pollo en cubos y sellá en sartén.','Sofreí la cebolla y los champiñones laminados.','Incorporá el pollo al caldo.','Cociná tapado 15 minutos. Terminá con perejil.']},
+{id:118,n:'Ensalada de la huerta',t:'cena',e:'🥗',bg:'rcv',k:220,m:'10 min',ig:'Bajo',tags:['Sin TACC','Vegetariano'],i:[['Mix de hojas verdes','3 tazas'],['Tomate','1'],['Zanahoria rallada','½'],['Remolacha','½'],['Semillas de girasol','1 cda'],['Aceite de oliva','1 cda']],p:['Lavá y escurrí las hojas verdes.','Cortá el tomate y rallá la zanahoria.','Cortá la remolacha en cubos pequeños.','Mezclá todo, condimentá y agregá las semillas.']},
+{id:119,n:'Atún con vegetales salteados',t:'cena',e:'🐟',bg:'rcb',k:275,m:'20 min',ig:'Bajo',tags:['Sin TACC','Proteínas'],i:[['Atún fresco','200g'],['Espárragos','6'],['Champiñones','100g'],['Ajo','2 dientes'],['Salsa de soja sin gluten','1 cda'],['Aceite de oliva','1 cda']],p:['Sellá el atún 2 minutos por lado.','Salteá los espárragos y champiñones con ajo.','Agregá la salsa de soja sin gluten al final.','Serví el atún sobre los vegetales.']}
 ];
 
-const menuSemanal = [
-  { dia:'Lunes', desayuno:'Porridge de avena sin gluten', almuerzo:'Ensalada mediterránea', merienda:'Bowl de frutas y semillas', cena:'Sopa de lentejas' },
-  { dia:'Martes', desayuno:'Revuelto de espinaca y huevo', almuerzo:'Tarta de verduras sin TACC', merienda:'Licuado verde antioxidante', cena:'Pollo al limón con arroz' },
-  { dia:'Miércoles', desayuno:'Porridge de avena sin gluten', almuerzo:'Pollo al limón con arroz', merienda:'Bowl de frutas y semillas', cena:'Sopa de lentejas' },
-  { dia:'Jueves', desayuno:'Revuelto de espinaca y huevo', almuerzo:'Ensalada mediterránea', merienda:'Licuado verde antioxidante', cena:'Tarta de verduras sin TACC' },
-  { dia:'Viernes', desayuno:'Porridge de avena sin gluten', almuerzo:'Tarta de verduras sin TACC', merienda:'Bowl de frutas y semillas', cena:'Pollo al limón con arroz' },
-  { dia:'Sábado', desayuno:'Revuelto de espinaca y huevo', almuerzo:'Sopa de lentejas', merienda:'Licuado verde antioxidante', cena:'Ensalada mediterránea' },
-  { dia:'Domingo', desayuno:'Porridge de avena sin gluten', almuerzo:'Pollo al limón con arroz', merienda:'Bowl de frutas y semillas', cena:'Sopa de lentejas' },
-];
+const COMP={'Verduras y frutas':['Lechuga','Tomate cherry','Pepino x2','Espinaca x2','Zanahoria x2','Cebolla x2','Morrón','Zapallito x2','Papa x2','Frutillas 200g','Banana x3','Manzana verde x2','Limón x3'],'Proteínas':['Huevos (docena)','Pechuga de pollo x2','Merluza 400g','Atún al natural x2'],'Almacén sin TACC':['Avena cert. sin TACC','Arroz integral','Lentejas 500g','Quinoa 250g','Harina de arroz 500g','Pasta de arroz','Caldo vegetal sin TACC','Fideos de arroz'],'Lácteos':['Leche descremada','Queso untable light','Ricota descremada','Yogur natural sin azúcar'],'Semillas y frutos secos':['Semillas de chía','Semillas de girasol','Nueces 100g','Almendras 100g'],'Condimentos':['Aceite de oliva','Aceite de coco','Aceitunas','Salsa de soja sin gluten','Cúrcuma','Comino','Canela']};
 
-const compras = ['Lechuga romana','Tomate cherry','Pepino x3','Aceitunas negras','Espinaca fresca x2','Huevos (docena)','Lentejas (500g)','Zanahoria x2','Cebolla x2','Frutillas','Banana x3','Semillas de chía','Semillas de girasol','Avena certificada sin TACC','Arroz integral','Pechuga de pollo','Harina de arroz','Queso untable descremado','Limón x3','Zapallito x2','Aceite de oliva','Manzana verde x2'];
+let P={n:'',gen:'f',peso:65,alt:165,edad:45,cond:'celiaca',act:'s',obj:'bajar',extra:['ninguno']};
+let tdee=1800,favs=[],regs=[{f:'02/06',p:64.5,g:92},{f:'03/06',p:64.3,g:88},{f:'04/06',p:64.4,g:95},{f:'05/06',p:64.2,g:90}],cChecks={},prevSc='rec',detId=null,filtroAct='todos';
 
-let perfil = { nombre: '', condicion: 'celiaca', actividad: 'sedentaria' };
-let registros = [
-  { fecha:'02/06', peso:64.5, glucosa:92 },
-  { fecha:'03/06', peso:64.3, glucosa:88 },
-  { fecha:'04/06', peso:64.4, glucosa:95 },
-  { fecha:'05/06', peso:64.2, glucosa:90 },
-];
-let filtroActivo = 'todos';
+function ir(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById('sc-'+s).classList.add('active');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function os(n,pct){document.querySelectorAll('.onb-step').forEach(x=>x.classList.remove('on'));document.getElementById('os'+n).classList.add('on');document.getElementById('ob').style.width=pct+'%';}
+function sel(el,g,v){document.querySelectorAll('[data-g="'+g+'"]').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');if(g==='gen')P.gen=v;if(g==='cond')P.cond=v;if(g==='act')P.act=v;if(g==='obj')P.obj=v;}
+function togM(el,g,v){
+  if(v==='ninguno'){document.querySelectorAll('[data-g="'+g+'"]').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');P.extra=['ninguno'];}
+  else{const ni=document.querySelector('[data-g="'+g+'"][onclick*="\'ninguno\'"]');ni&&ni.classList.remove('sel');el.classList.toggle('sel');const s=[...document.querySelectorAll('[data-g="'+g+'"].sel')].map(c=>{const m=c.getAttribute('onclick').match(/'([^']+)'\)$/);return m?m[1]:null;}).filter(Boolean);P.extra=s.length?s:['ninguno'];}
+}
+function calcTDEE(){
+  const p=parseFloat(P.peso)||65,a=parseFloat(P.alt)||165,e=parseFloat(P.edad)||45;
+  let tmb=P.gen==='m'?88.36+(13.4*p)+(4.8*a)-(5.7*e):447.6+(9.25*p)+(3.1*a)-(4.33*e);
+  const f={s:1.2,l:1.375,m:1.55,i:1.725};
+  let cal=Math.round(tmb*(f[P.act]||1.2));
+  if(P.obj==='bajar')cal=Math.round(cal*0.82);
+  else if(P.obj==='tonificar')cal=Math.round(cal*1.07);
+  return cal;
+}
+function dist(t){return{des:Math.round(t*0.25),alm:Math.round(t*0.35),mer:Math.round(t*0.15),cen:Math.round(t*0.25)};}
+function byKcal(tipo,target,n){return REC.filter(r=>r.t===tipo).sort((a,b)=>Math.abs(a.k-target)-Math.abs(b.k-target)).slice(0,n);}
 
-function nextStep(n) {
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step-'+n).classList.add('active');
+function prepResumen(){
+  P.n=document.getElementById('i-nom').value.trim()||'Amiga';
+  P.peso=parseFloat(document.getElementById('i-peso').value)||65;
+  P.alt=parseFloat(document.getElementById('i-alt').value)||165;
+  P.edad=parseFloat(document.getElementById('i-edad').value)||45;
+  tdee=calcTDEE();
+  const d=dist(tdee);
+  document.getElementById('onb-nom').textContent=P.n;
+  document.getElementById('res-cals').textContent=tdee.toLocaleString('es-AR')+' kcal/día';
+  const om={bajar:'Bajar de peso 🎯',tonificar:'Tonificar y fortalecer 💪',mantener:'Mantenerme ⚖️',salud:'Mejorar mi salud ❤️'};
+  const cm={celiaca:'Celíaca 🌾',diabetica:'Diabética 💉',ambas:'Celíaca + Diabética 🌿',ninguna:'Sin restricciones 💚'};
+  document.getElementById('res-obj').textContent=om[P.obj];
+  document.getElementById('res-cond').textContent=cm[P.cond];
+  document.getElementById('res-dist').textContent='Des '+d.des+' · Alm '+d.alm+' · Mer '+d.mer+' · Cen '+d.cen+' kcal';
+  os(8,100);
 }
 
-function selectOption(el, group, val) {
-  document.querySelectorAll(`[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  if(group==='cond') perfil.condicion = val;
-  if(group==='act') perfil.actividad = val;
-}
-
-function finishOnboarding() {
-  const nombre = document.getElementById('input-nombre').value.trim() || 'Amiga';
-  perfil.nombre = nombre;
-  document.getElementById('nombre-display').textContent = nombre;
-  document.getElementById('avatar-display').textContent = nombre[0].toUpperCase();
-  const ahora = new Date();
-  document.getElementById('fecha-display').textContent = ahora.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
-  const dias = ['dom','lun','mar','mié','jue','vie','sáb'];
-  const hoy = ahora.getDay();
-  const lunes = new Date(ahora); lunes.setDate(ahora.getDate() - ((hoy+6)%7));
-  document.getElementById('semana-label').textContent = lunes.toLocaleDateString('es-AR',{day:'numeric',month:'long'});
+function iniciarApp(){
+  document.getElementById('n-disp').textContent=P.n;
+  document.getElementById('av-disp').textContent=P.n[0].toUpperCase();
+  const hoy=new Date();
+  document.getElementById('f-disp').textContent=hoy.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('sp-cals').textContent=tdee.toLocaleString('es-AR');
+  const om={bajar:'Quiero bajar de peso 🎯',tonificar:'Quiero tonificar 💪',mantener:'Quiero mantenerme ⚖️',salud:'Mejorar mi salud ❤️'};
+  document.getElementById('pb-tag').textContent=om[P.obj];
+  document.getElementById('pb-title').textContent=P.n+', tu plan está activo';
+  document.getElementById('pb-meta').textContent='120 recetas adaptadas a tus '+tdee.toLocaleString('es-AR')+' kcal';
+  const d=dist(tdee);
+  const almPool=byKcal('almuerzo',d.alm,10);
+  const rec=almPool[hoy.getDay()%almPool.length];
+  document.getElementById('hoy-tit').textContent=rec.n;
+  document.getElementById('hoy-chips').innerHTML='<span class="hh-chip">🕐 '+rec.m+'</span><span class="hh-chip">'+rec.k+' kcal</span><span class="hh-chip">IG '+rec.ig+'</span>';
+  document.getElementById('btn-ver-hoy').onclick=()=>abrirRec(rec.id,'home');
+  renderScroll('sc-des',byKcal('desayuno',d.des,8));
+  renderScroll('sc-alm',byKcal('almuerzo',d.alm,8));
+  renderScroll('sc-mer',byKcal('merienda',d.mer,8));
+  const tips=['Tomá agua antes de cada comida — ayuda a la digestión y te mantiene satisfecha.','Masticá despacio. El cerebro tarda 20 minutos en registrar que estás satisfecha.','No saltees comidas. Comer cada 3-4 horas mantiene el metabolismo activo.','Cocinar en casa te da control total sobre lo que comés.','Las verduras de hoja verde son tus grandes aliadas. Espinaca, rúcula y lechuga son increíbles.','Hidratarse bien hace toda la diferencia: 8 vasos de agua al día.','Un buen desayuno es la base de tu día. No lo saltees.'];
+  document.getElementById('tip-txt').textContent=tips[hoy.getDay()%tips.length];
   renderRecetas('todos');
   renderMenu();
-  renderHistorial();
+  renderHist();
   renderChart();
-  calcular();
-  goTo('home');
+  ir('home');
 }
 
-function goTo(screen) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-'+screen).classList.add('active');
+function renderScroll(id,arr){
+  document.getElementById(id).innerHTML=arr.map(r=>'<div class="rc" onclick="abrirRec('+r.id+',\'home\')"><div class="rc-img '+r.bg+'"><span>'+r.e+'</span><span class="rc-kcal">'+r.k+' kcal</span></div><div class="rc-body"><div class="rc-name">'+r.n+'</div><div class="rc-meta">🕐 '+r.m+'</div></div></div>').join('');
 }
 
-function filtrar(btn, tipo) {
-  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  filtroActivo = tipo;
-  renderRecetas(tipo);
+function ft(btn,t){document.querySelectorAll('.ft').forEach(b=>b.classList.remove('on'));btn.classList.add('on');filtroAct=t;document.getElementById('si').value='';renderRecetas(t);}
+function filtrarYver(t){ir('rec');setTimeout(()=>{document.querySelectorAll('.ft').forEach(b=>b.classList.remove('on'));const bt=document.querySelector('.ft#ft-'+t.substring(0,3));if(bt)bt.classList.add('on');filtroAct=t;renderRecetas(t);},80);}
+function buscar(q){renderLista(q?REC.filter(r=>r.n.toLowerCase().includes(q.toLowerCase())):REC.filter(r=>filtroAct==='todos'||r.t===filtroAct));}
+function renderRecetas(t){renderLista(t==='todos'?REC:REC.filter(r=>r.t===t));}
+function renderLista(arr){
+  document.getElementById('rl').innerHTML=arr.map(r=>'<div class="ri fu" onclick="abrirRec('+r.id+',\'rec\')"><div class="ri-em '+r.bg+'">'+r.e+'</div><div class="ri-info"><h3>'+r.n+'</h3><div class="ri-meta">🕐 '+r.m+' · IG '+r.ig+'</div><div class="tags"><span class="kcal-badge">'+r.k+' kcal</span>'+r.tags.map(t=>'<span class="tag tg">'+t+'</span>').join('')+'<span class="tag to">'+r.t.charAt(0).toUpperCase()+r.t.slice(1)+'</span></div></div><div class="ri-arr">›</div></div>').join('');
 }
 
-function renderRecetas(tipo) {
-  const lista = document.getElementById('receta-lista');
-  const filtradas = tipo === 'todos' ? recetas : recetas.filter(r => r.tipo === tipo);
-  lista.innerHTML = filtradas.map(r => `
-    <div class="receta-item" onclick="abrirReceta(${r.id})">
-      <div class="receta-emoji">${r.emoji}</div>
-      <div class="receta-info">
-        <h3>${r.nombre}</h3>
-        <p>🕐 ${r.tiempo} · ${r.cals} kcal · IG ${r.ig}</p>
-        <div class="receta-tags">
-          ${r.tags.map(t => `<span class="tag tag-verde">${t}</span>`).join('')}
-          <span class="tag tag-azul">${r.tipo.charAt(0).toUpperCase()+r.tipo.slice(1)}</span>
-        </div>
-      </div>
-    </div>
-  `).join('');
+function abrirRec(id,from){
+  prevSc=from||'rec';detId=id;
+  const r=REC[id],d=dist(tdee);
+  document.getElementById('det-bg').className='det-hero '+r.bg;
+  document.getElementById('det-em').textContent=r.e;
+  document.getElementById('det-fav').textContent=favs.includes(id)?'❤️':'🤍';
+  const igCls=r.ig==='Bajo'?'igb':r.ig.includes('Medio')?'igm':'iga';
+  const tgt={desayuno:d.des,almuerzo:d.alm,merienda:d.mer,cena:d.cen}[r.t]||0;
+  const diff=r.k-tgt;
+  const nota=diff>40?'Esta receta tiene '+diff+' kcal más de lo sugerido. Podés reducir un poco la porción.':diff<-40?'Esta receta tiene '+Math.abs(diff)+' kcal menos. Podés complementar con una pequeña colación.':'Esta receta encaja perfectamente en tu plan de '+tdee.toLocaleString('es-AR')+' kcal. ✓';
+  document.getElementById('det-bd').innerHTML='<h2>'+r.n+'</h2><div class="ig-b '+igCls+'">📊 Índice glucémico: '+r.ig+'</div><div class="cals-note">💪 '+nota+'</div><div class="tags" style="margin-bottom:16px">'+r.tags.map(t=>'<span class="tag tg">'+t+'</span>').join('')+'<span class="tag to">'+r.t.charAt(0).toUpperCase()+r.t.slice(1)+'</span></div><div class="det-nums"><div class="dnum"><div class="dv">'+r.k+'</div><div class="dl">kcal</div></div><div class="dnum"><div class="dv">'+r.m+'</div><div class="dl">tiempo</div></div><div class="dnum"><div class="dv">'+r.i.length+'</div><div class="dl">ingredientes</div></div></div><div class="det-sec"><h3>🛒 Ingredientes</h3><ul class="ing-l">'+r.i.map(x=>'<li>'+x[0]+'<span class="iq">'+x[1]+'</span></li>').join('')+'</ul></div><div class="det-sec"><h3>👩‍🍳 Preparación paso a paso</h3>'+r.p.map((p,i)=>'<div class="paso"><div class="pn">'+(i+1)+'</div><p>'+p+'</p></div>').join('')+'</div>';
+  ir('det');
 }
+function volverDet(){ir(prevSc);}
+function togFav(){if(detId===null)return;const i=favs.indexOf(detId);if(i>-1){favs.splice(i,1);document.getElementById('det-fav').textContent='🤍';toast('Eliminado de favoritos');}else{favs.push(detId);document.getElementById('det-fav').textContent='❤️';toast('❤️ Guardado en favoritos');}}
 
-function abrirReceta(id) {
-  const r = recetas[id];
-  document.getElementById('det-emoji').textContent = r.emoji;
-  document.getElementById('det-body').innerHTML = `
-    <h2>${r.nombre}</h2>
-    <div class="det-meta">
-      ${r.tags.map(t=>`<span class="tag tag-verde">${t}</span>`).join('')}
-      <span class="tag tag-naranja">${r.tipo.charAt(0).toUpperCase()+r.tipo.slice(1)}</span>
-    </div>
-    <div class="det-nums">
-      <div class="det-num"><div class="dn-val">${r.cals}</div><div class="dn-label">kcal</div></div>
-      <div class="det-num"><div class="dn-val">${r.tiempo}</div><div class="dn-label">tiempo</div></div>
-      <div class="det-num"><div class="dn-val">IG ${r.ig}</div><div class="dn-label">glucémico</div></div>
-    </div>
-    <div class="det-section">
-      <h3>🛒 Ingredientes</h3>
-      <ul class="ingr-list">
-        ${r.ingredientes.map(i=>`<li>${i[0]}<span>${i[1]}</span></li>`).join('')}
-      </ul>
-    </div>
-    <div class="det-section">
-      <h3>👩‍🍳 Preparación</h3>
-      ${r.pasos.map((p,i)=>`<div class="paso"><div class="paso-num">${i+1}</div><p>${p}</p></div>`).join('')}
-    </div>
-  `;
-  goTo('detalle');
-}
-
-function renderMenu() {
-  const emojis = { desayuno:'🌅', almuerzo:'☀️', merienda:'🍵', cena:'🌙' };
-  document.getElementById('menu-dias').innerHTML = menuSemanal.map(d => `
-    <div class="dia-card">
-      <div class="dia-header">
-        <h3>${d.dia}</h3>
-        <span>4 comidas · ~1.050 kcal</span>
-      </div>
-      <div class="dia-body">
-        ${['desayuno','almuerzo','merienda','cena'].map(c=>`
-          <div class="comida-row">
-            <div class="comida-emoji">${emojis[c]}</div>
-            <div class="comida-info">
-              <div class="ci-tipo">${c.charAt(0).toUpperCase()+c.slice(1)}</div>
-              <div class="ci-nom">${d[c]}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-function mostrarCompras() {
-  const lista = compras.map(i=>`• ${i}`).join('\n');
-  alert('🛒 Lista de compras semanal:\n\n'+lista);
-}
-
-function calcular() {
-  const peso = parseInt(document.getElementById('sl-peso').value);
-  const altura = parseInt(document.getElementById('sl-altura').value);
-  const edad = parseInt(document.getElementById('sl-edad').value);
-  document.getElementById('val-peso').textContent = peso;
-  document.getElementById('val-altura').textContent = altura;
-  document.getElementById('val-edad').textContent = edad;
-  const tmb = 447.6 + (9.25*peso) + (3.1*altura) - (4.33*edad);
-  const factores = { sedentaria:1.2, leve:1.375, moderada:1.55, intensa:1.725 };
-  const actSel = document.querySelector('[data-group="act2"].selected');
-  const factor = factores[actSel ? actSel.dataset.val : 'sedentaria'];
-  const tdee = Math.round(tmb * factor);
-  document.getElementById('result-cals').textContent = tdee.toLocaleString('es-AR');
-  document.getElementById('m-prot').textContent = Math.round(tdee*0.30/4)+'g';
-  document.getElementById('m-carb').textContent = Math.round(tdee*0.45/4)+'g';
-  document.getElementById('m-gras').textContent = Math.round(tdee*0.25/9)+'g';
-  document.getElementById('cals-stat').textContent = (tdee/1000).toFixed(1).replace('.',',')+' k';
-}
-
-function guardarRegistro() {
-  const peso = document.getElementById('inp-peso').value;
-  const glucosa = document.getElementById('inp-glucosa').value;
-  if(!peso && !glucosa) { showToast('Ingresá al menos un valor'); return; }
-  const hoy = new Date();
-  const fecha = hoy.getDate().toString().padStart(2,'0')+'/'+(hoy.getMonth()+1).toString().padStart(2,'0');
-  registros.unshift({ fecha, peso: peso||'—', glucosa: glucosa||'—' });
-  document.getElementById('inp-peso').value = '';
-  document.getElementById('inp-glucosa').value = '';
-  renderHistorial();
-  renderChart();
-  showToast('✅ Registro guardado');
-}
-
-function renderHistorial() {
-  document.getElementById('historial-lista').innerHTML = registros.slice(0,7).map(r => {
-    const g = parseFloat(r.glucosa);
-    const cls = isNaN(g) ? '' : g < 100 ? 'bueno' : g < 126 ? 'medio' : 'malo';
-    return `
-      <div class="reg-item">
-        <span class="ri-fecha">${r.fecha}</span>
-        <div class="ri-vals">
-          <div class="reg-val"><div class="rv-num">${r.peso}</div><div class="rv-label">kg</div></div>
-          <div class="reg-val"><div class="rv-num ${cls}">${r.glucosa}</div><div class="rv-label">mg/dL</div></div>
-        </div>
-      </div>
-    `;
+function renderMenu(){
+  const d=dist(tdee);
+  const dias=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const hoyN=dias[(new Date().getDay()+6)%7];
+  const desP=byKcal('desayuno',d.des,30),almP=byKcal('almuerzo',d.alm,30),merP=byKcal('merienda',d.mer,30),cenP=byKcal('cena',d.cen,30);
+  const sem=dias.map((dia,i)=>({dia,des:desP[i%desP.length],alm:almP[i%almP.length],mer:merP[i%merP.length],cen:cenP[i%cenP.length]}));
+  const eim={des:'🌅',alm:'☀️',mer:'🍵',cen:'🌙'};
+  const bgm={des:'sig',alm:'sia',mer:'sir',cen:'sig'};
+  document.getElementById('dias-wrap').innerHTML=sem.map(s=>{
+    const esH=s.dia===hoyN;
+    const tot=s.des.k+s.alm.k+s.mer.k+s.cen.k;
+    return'<div class="dia-c"><div class="dt'+(esH?' hoy':'')+'" onclick="togDia(this)"><div class="dtd">'+s.dia+(esH?' 📍':'')+'</div><div class="dtc">~'+tot+' kcal · 4 comidas</div></div><div class="drows'+(esH?' op':'')+'">'+[['des',s.des],['alm',s.alm],['mer',s.mer],['cen',s.cen]].map(([tp,r])=>'<div class="crow" onclick="abrirRec('+r.id+',\'menu\')"><div class="cr-ic '+bgm[tp]+'">'+eim[tp]+'</div><div><div class="cr-tipo">'+(tp==='des'?'Desayuno':tp==='alm'?'Almuerzo':tp==='mer'?'Merienda':'Cena')+'</div><div class="cr-nom">'+r.n+'</div><div class="cr-kcal">'+r.k+' kcal</div></div></div>').join('')+'</div></div>';
   }).join('');
+  const lun=new Date();lun.setDate(lun.getDate()-((lun.getDay()+6)%7));
+  document.getElementById('sem-txt').textContent='Semana del '+lun.toLocaleDateString('es-AR',{day:'numeric',month:'long'})+' · Adaptado a tu objetivo';
+}
+function togDia(el){el.nextElementSibling.classList.toggle('op');}
+
+function abrirCompras(){
+  document.getElementById('comp-cont').innerHTML=Object.keys(COMP).map(cat=>'<div class="ccat"><h4>'+cat+'</h4>'+COMP[cat].map(item=>{const k=cat+'-'+item,dk=cChecks[k];return'<div class="ci" onclick="togComp(\''+k+'\',this)"><div class="ci-cb'+(dk?' dk':'')+'>'+(dk?'✓':'')+'</div><div class="ci-nm'+(dk?' dk':'\'")">'+item+'</div></div>';}).join('')+'</div>').join('');
+  document.getElementById('mo-comp').classList.add('op');
+}
+function togComp(k,el){cChecks[k]=!cChecks[k];const dk=cChecks[k];el.querySelector('.ci-cb').className='ci-cb'+(dk?' dk':'');el.querySelector('.ci-cb').textContent=dk?'✓':'';el.querySelector('.ci-nm').className='ci-nm'+(dk?' dk':'');}
+function cerrarCompras(){document.getElementById('mo-comp').classList.remove('op');}
+function cerrarCompClick(e){if(e.target===e.currentTarget)cerrarCompras();}
+
+function guardar(){
+  const p=document.getElementById('i-p').value,g=document.getElementById('i-g').value;
+  if(!p&&!g){toast('⚠️ Ingresá al menos un valor');return;}
+  const f=new Date(),fd=f.getDate().toString().padStart(2,'0')+'/'+(f.getMonth()+1).toString().padStart(2,'0');
+  regs.unshift({f:fd,p:p||'—',g:g||'—'});
+  if(g)document.getElementById('sp-gluc').textContent=g;
+  document.getElementById('i-p').value='';document.getElementById('i-g').value='';
+  renderHist();renderChart();toast('✅ Registro guardado');
+}
+function renderHist(){
+  document.getElementById('hist').innerHTML=regs.slice(0,7).map(r=>{const gv=parseFloat(r.g),cls=isNaN(gv)?'':gv<100?'ok':gv<126?'warn':'bad';return'<div class="hr"><span class="hrf">'+r.f+'</span><div class="hrv"><div class="hv"><div class="hvn">'+r.p+'</div><div class="hvl">kg</div></div><div class="hv"><div class="hvn '+cls+'">'+r.g+'</div><div class="hvl">mg/dL</div></div></div></div>';}).join('');
+}
+function renderChart(){
+  const datos=regs.slice(0,7).reverse(),maxV=Math.max(...datos.map(d=>parseFloat(d.g)||0),140);
+  document.getElementById('ch-area').innerHTML=datos.map(d=>{const g=parseFloat(d.g)||0,h=g?Math.round((g/maxV)*80):0,c=g<100?'var(--g2)':g<126?'var(--acc)':'var(--acc2)';return'<div class="bc"><div class="bf" style="height:'+h+'px;background:'+c+'"></div><div class="bd">'+d.f+'</div></div>';}).join('');
 }
 
-function renderChart() {
-  const datos = registros.slice(0,7).reverse();
-  const max = Math.max(...datos.map(d=>parseFloat(d.glucosa)||0), 140);
-  document.getElementById('glucosa-chart').innerHTML = datos.map(d => {
-    const g = parseFloat(d.glucosa)||0;
-    const h = Math.round((g/max)*70);
-    const color = g < 100 ? '#1a9e6e' : g < 126 ? '#f0893a' : '#e05252';
-    return `<div class="bar-wrap"><div class="bar" style="height:${h}px;background:${color}"></div><div class="bar-label">${d.fecha}</div></div>`;
-  }).join('');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
-}
+document.getElementById('btn-empezar').addEventListener('click',()=>ir('onb'));
+document.getElementById('os7').querySelector('.btn-sig').addEventListener('click',prepResumen);
+document.getElementById('btn-iniciar').addEventListener('click',iniciarApp);
 </script>
 </body>
 </html>
