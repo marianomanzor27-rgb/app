@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriVida — Recetas para Celíacas y Diabéticas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #1a9e6e;
+    --verde-dark: #0d6e4a;
+    --verde-light: #e8f7f1;
+    --verde-mid: #b2e4cf;
+    --amarillo: #f5c842;
+    --fondo: #f7f9f7;
+    --blanco: #ffffff;
+    --texto: #1a1e1a;
+    --texto-suave: #5a6b5a;
+    --borde: #dce8dc;
+    --rojo: #e05252;
+    --naranja: #f0893a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--fondo); color: var(--texto); }
+
+  /* LAYOUT */
+  .app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--blanco); position: relative; display: flex; flex-direction: column; }
+  .screen { display: none; flex-direction: column; flex: 1; }
+  .screen.active { display: flex; }
+
+  /* NAV BOTTOM */
+  .nav-bottom {
+    position: sticky; bottom: 0; background: var(--blanco);
+    border-top: 1px solid var(--borde);
+    display: flex; padding: 8px 0 16px;
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: none; cursor: pointer; padding: 4px 0;
+    color: var(--texto-suave); font-size: 10px; font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--verde); }
+  .nav-btn svg { width: 22px; height: 22px; }
+
+  /* ONBOARDING */
+  #screen-onboarding { background: var(--blanco); }
+  .onb-hero {
+    background: var(--verde);
+    padding: 48px 28px 36px;
+    text-align: center;
+  }
+  .onb-logo {
+    width: 72px; height: 72px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+  }
+  .onb-hero h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: #fff; margin-bottom: 8px; }
+  .onb-hero p { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; }
+  .onb-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .onb-badge { background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+
+  .onb-body { padding: 28px 24px; flex: 1; overflow-y: auto; }
+  .onb-body h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; color: var(--texto-suave); margin-bottom: 8px; font-weight: 500; }
+  .field input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--borde);
+    border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif;
+    background: var(--fondo); outline: none; transition: border 0.2s;
+  }
+  .field input:focus { border-color: var(--verde); }
+
+  .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .option-card {
+    border: 1.5px solid var(--borde); border-radius: 14px; padding: 14px 12px;
+    cursor: pointer; text-align: center; transition: all 0.2s; background: var(--blanco);
+  }
+  .option-card.selected { border-color: var(--verde); background: var(--verde-light); }
+  .option-card .oc-icon { font-size: 24px; margin-bottom: 6px; }
+  .option-card .oc-label { font-size: 13px; font-weight: 500; }
+  .option-card .oc-sub { font-size: 11px; color: var(--texto-suave); margin-top: 2px; }
+
+  .btn-primary {
+    width: 100%; padding: 15px; background: var(--verde); color: #fff;
+    border: none; border-radius: 14px; font-size: 15px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--verde-dark); }
+  .btn-sec {
+    width: 100%; padding: 13px; background: transparent; color: var(--texto-suave);
+    border: 1.5px solid var(--borde); border-radius: 14px; font-size: 14px;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px;
+  }
+
+  /* HOME */
+  #screen-home { overflow-y: auto; }
+  .home-header {
+    padding: 24px 20px 16px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .home-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; }
+  .home-header p { font-size: 13px; color: var(--texto-suave); margin-top: 2px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--verde); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 16px; flex-shrink: 0; }
+
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 20px 20px; }
+  .stat-card { background: var(--fondo); border-radius: 14px; padding: 12px; text-align: center; }
+  .stat-card .sc-num { font-size: 20px; font-weight: 600; color: var(--verde); }
+  .stat-card .sc-label { font-size: 11px; color: var(--texto-suave); margin-top: 2px; }
+
+  .section-title { padding: 0 20px 12px; font-size: 15px; font-weight: 600; }
+
+  .hoy-card {
+    margin: 0 20px 20px;
+    background: var(--verde);
+    border-radius: 18px;
+    padding: 18px 20px;
+    color: #fff;
+  }
+  .hoy-card .hc-label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; }
+  .hoy-card .hc-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 8px; }
+  .hoy-card .hc-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hoy-card .hc-tag { background: rgba(255,255,255,0.2); font-size: 11px; padding: 4px 10px; border-radius: 20px; }
+
+  .recetas-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 0 20px 20px; scrollbar-width: none; }
+  .recetas-scroll::-webkit-scrollbar { display: none; }
+  .mini-card {
+    flex-shrink: 0; width: 150px; background: var(--fondo); border-radius: 16px; overflow: hidden; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .mini-card:hover { transform: translateY(-2px); }
+  .mini-card .mc-emoji { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 48px; background: var(--verde-light); }
+  .mini-card .mc-body { padding: 10px; }
+  .mini-card .mc-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
+  .mini-card .mc-tag { font-size: 11px; color: var(--texto-suave); margin-top: 4px; }
+
+  /* RECETAS */
+  #screen-recetas { overflow-y: auto; }
+  .recetas-header { padding: 24px 20px 16px; }
+  .recetas-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 14px; }
+
+  .filtros { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .filtros::-webkit-scrollbar { display: none; }
+  .filtro-btn {
+    flex-shrink: 0; padding: 7px 14px; border-radius: 20px; font-size: 13px;
+    border: 1.5px solid var(--borde); background: var(--blanco); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; color: var(--texto-suave); transition: all 0.2s;
+  }
+  .filtro-btn.active { background: var(--verde); border-color: var(--verde); color: #fff; }
+
+  .receta-lista { padding: 8px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .receta-item {
+    display: flex; gap: 14px; align-items: center;
+    background: var(--fondo); border-radius: 16px; padding: 14px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .receta-item:hover { background: var(--verde-light); }
+  .receta-emoji { font-size: 36px; width: 56px; height: 56px; background: var(--blanco); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .receta-info { flex: 1; }
+  .receta-info h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .receta-info p { font-size: 12px; color: var(--texto-suave); }
+  .receta-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+  .tag-verde { background: var(--verde-light); color: var(--verde-dark); }
+  .tag-naranja { background: #fef0e6; color: #c05a10; }
+  .tag-azul { background: #e8f0fe; color: #1a5cb0; }
+
+  /* DETALLE RECETA */
+  #screen-detalle { overflow-y: auto; }
+  .det-header { position: relative; }
+  .det-emoji-bg { background: var(--verde-light); height: 160px; display: flex; align-items: center; justify-content: center; font-size: 80px; }
+  .det-back {
+    position: absolute; top: 16px; left: 16px;
+    width: 36px; height: 36px; background: rgba(255,255,255,0.9);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border: none; font-size: 18px;
+  }
+  .det-body { padding: 20px; }
+  .det-body h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .det-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .det-nums { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+  .det-num { background: var(--fondo); border-radius: 12px; padding: 12px; text-align: center; }
+  .det-num .dn-val { font-size: 18px; font-weight: 600; color: var(--verde); }
+  .det-num .dn-label { font-size: 11px; color: var(--texto-suave); }
+  .det-section { margin-bottom: 20px; }
+  .det-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+  .ingr-list { list-style: none; }
+  .ingr-list li { padding: 8px 0; border-bottom: 1px solid var(--borde); font-size: 14px; display: flex; justify-content: space-between; }
+  .ingr-list li:last-child { border-bottom: none; }
+  .ingr-list li span { color: var(--texto-suave); font-size: 13px; }
+  .paso { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .paso-num { width: 28px; height: 28px; background: var(--verde); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+  .paso p { font-size: 14px; line-height: 1.6; color: var(--texto); }
+
+  /* MENU */
+  #screen-menu { overflow-y: auto; }
+  .menu-header { padding: 24px 20px 16px; }
+  .menu-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .menu-header p { font-size: 13px; color: var(--texto-suave); }
+  .dia-card { margin: 0 20px 14px; border: 1.5px solid var(--borde); border-radius: 16px; overflow: hidden; }
+  .dia-header { background: var(--fondo); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .dia-header h3 { font-size: 14px; font-weight: 600; }
+  .dia-header span { font-size: 12px; color: var(--texto-suave); }
+  .dia-body { padding: 12px 16px; border-top: 1px solid var(--borde); }
+  .comida-row { display: flex; gap: 10px; align-items: center; padding: 6px 0; }
+  .comida-emoji { font-size: 20px; width: 32px; text-align: center; }
+  .comida-info { flex: 1; }
+  .comida-info .ci-tipo { font-size: 11px; color: var(--texto-suave); }
+  .comida-info .ci-nom { font-size: 13px; font-weight: 500; }
+  .compras-btn {
+    margin: 4px 20px 20px; padding: 14px; background: var(--verde-light); color: var(--verde-dark);
+    border: 1.5px solid var(--verde-mid); border-radius: 14px; font-size: 14px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  /* CALCULADORA */
+  #screen-calc { overflow-y: auto; }
+  .calc-header { padding: 24px 20px 16px; }
+  .calc-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; }
+  .calc-body { padding: 0 20px 20px; }
+  .slider-field { margin-bottom: 20px; }
+  .slider-field label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+  .slider-field label span { color: var(--verde); font-weight: 600; }
+  input[type=range] {
+    width: 100%; -webkit-appearance: none; height: 6px;
+    background: var(--borde); border-radius: 3px; outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px;
+    background: var(--verde); border-radius: 50%; cursor: pointer;
+  }
+  .result-big { background: var(--verde); color: #fff; border-radius: 18px; padding: 24px; text-align: center; margin-bottom: 20px; }
+  .result-big .rb-num { font-size: 42px; font-weight: 700; }
+  .result-big .rb-label { font-size: 14px; opacity: 0.85; margin-top: 4px; }
+  .macros-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .macro-card { background: var(--fondo); border-radius: 12px; padding: 12px; text-align: center; }
+  .macro-card .mv { font-size: 16px; font-weight: 600; }
+  .macro-card .ml { font-size: 11px; color: var(--texto-suave); margin-top: 2px; }
+  .macro-card.mc-prot .mv { color: #e05252; }
+  .macro-card.mc-carb .mv { color: #f0893a; }
+  .macro-card.mc-gras .mv { color: #1a9e6e; }
+
+  /* SEGUIMIENTO */
+  #screen-seguimiento { overflow-y: auto; }
+  .seg-header { padding: 24px 20px 16px; }
+  .seg-header h2 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .seg-header p { font-size: 13px; color: var(--texto-suave); }
+  .seg-body { padding: 0 20px 20px; }
+  .registro-form { background: var(--fondo); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+  .registro-form h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-group label { font-size: 12px; color: var(--texto-suave); }
+  .input-group input {
+    padding: 10px 12px; border: 1.5px solid var(--borde); border-radius: 10px;
+    font-size: 15px; font-family: 'DM Sans', sans-serif; background: var(--blanco); outline: none;
+  }
+  .input-group input:focus { border-color: var(--verde); }
+  .btn-guardar {
+    width: 100%; padding: 12px; background: var(--verde); color: #fff;
+    border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; cursor: pointer;
+  }
+  .registros-lista { }
+  .registros-lista h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .reg-item { background: var(--fondo); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .reg-item .ri-fecha { font-size: 12px; color: var(--texto-suave); }
+  .reg-item .ri-vals { display: flex; gap: 16px; }
+  .reg-val { text-align: center; }
+  .reg-val .rv-num { font-size: 15px; font-weight: 600; }
+  .reg-val .rv-label { font-size: 10px; color: var(--texto-suave); }
+  .rv-num.bueno { color: var(--verde); }
+  .rv-num.medio { color: var(--naranja); }
+  .rv-num.malo { color: var(--rojo); }
+
+  .chart-container { background: var(--fondo); border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+  .chart-container h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
+  .bar-label { font-size: 9px; color: var(--texto-suave); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--texto); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ONBOARDING -->
+  <div id="screen-onboarding" class="screen active">
+    <div class="onb-hero">
+      <div class="onb-logo">🌿</div>
+      <h1>NutriVida</h1>
+      <p>365 recetas diseñadas para celíacas y diabéticas. Tu salud, cada día.</p>
+      <div class="onb-badges">
+        <span class="onb-badge">Sin TACC</span>
+        <span class="onb-badge">Bajo índice glucémico</span>
+        <span class="onb-badge">365 recetas</span>
+      </div>
+    </div>
+    <div class="onb-body">
+      <!-- STEP 1 -->
+      <div class="step active" id="step-1">
+        <h2>¿Cómo te llamás?</h2>
+        <div class="field">
+          <label>Tu nombre</label>
+          <input type="text" id="input-nombre" placeholder="Ej: María" />
+        </div>
+        <button class="btn-primary" onclick="nextStep(2)">Continuar →</button>
+      </div>
+      <!-- STEP 2 -->
+      <div class="step" id="step-2">
+        <h2>¿Cuál es tu condición?</h2>
+        <div class="option-grid" style="margin-bottom:18px">
+          <div class="option-card selected" onclick="selectOption(this,'cond','celiaca')" data-group="cond" data-val="celiaca">
+            <div class="oc-icon">🌾</div>
+            <div class="oc-label">Celíaca</div>
+            <div class="oc-sub">Sin TACC</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'cond','diabetica')" data-group="cond" data-val="diabetica">
+            <div class="oc-icon">💉</div>
+            <div class="oc-label">Diabética</div>
+            <div class="oc-sub">Control glucémico</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'cond','ambas')" data-group="cond" data-val="ambas">
+            <div class="oc-icon">🌿</div>
+            <div class="oc-label">Ambas</div>
+            <div class="oc-sub">Sin TACC + glucemia</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'cond','otra')" data-group="cond" data-val="otra">
+            <div class="oc-icon">💚</div>
+            <div class="oc-label">Otra / General</div>
+            <div class="oc-sub">Solo comer sano</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="nextStep(3)">Continuar →</button>
+        <button class="btn-sec" onclick="nextStep(1)">← Atrás</button>
+      </div>
+      <!-- STEP 3 -->
+      <div class="step" id="step-3">
+        <h2>¿Cuánto actividad física hacés?</h2>
+        <div class="option-grid" style="margin-bottom:18px">
+          <div class="option-card selected" onclick="selectOption(this,'act','sedentaria')" data-group="act" data-val="sedentaria">
+            <div class="oc-icon">🛋️</div>
+            <div class="oc-label">Sedentaria</div>
+            <div class="oc-sub">Poca o ninguna</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'act','leve')" data-group="act" data-val="leve">
+            <div class="oc-icon">🚶</div>
+            <div class="oc-label">Leve</div>
+            <div class="oc-sub">1-2 días/semana</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'act','moderada')" data-group="act" data-val="moderada">
+            <div class="oc-icon">🏃</div>
+            <div class="oc-label">Moderada</div>
+            <div class="oc-sub">3-4 días/semana</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'act','intensa')" data-group="act" data-val="intensa">
+            <div class="oc-icon">🏋️</div>
+            <div class="oc-label">Intensa</div>
+            <div class="oc-sub">5+ días/semana</div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="finishOnboarding()">¡Empezar! →</button>
+        <button class="btn-sec" onclick="nextStep(2)">← Atrás</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen">
+    <div class="home-header">
+      <div>
+        <h2>Hola, <span id="nombre-display">María</span> 👋</h2>
+        <p id="fecha-display"></p>
+      </div>
+      <div class="avatar" id="avatar-display">M</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="sc-num">365</div><div class="sc-label">Recetas</div></div>
+      <div class="stat-card"><div class="sc-num" id="cals-stat">1.850</div><div class="sc-label">Cal/día</div></div>
+      <div class="stat-card"><div class="sc-num">7</div><div class="sc-label">Días menú</div></div>
+    </div>
+    <div class="section-title">Receta del día</div>
+    <div class="hoy-card">
+      <div class="hc-label">Almuerzo de hoy</div>
+      <div class="hc-title">Tarta de verduras sin TACC</div>
+      <div class="hc-row">
+        <span class="hc-tag">🕐 35 min</span>
+        <span class="hc-tag">280 kcal</span>
+        <span class="hc-tag">IG bajo</span>
+        <span class="hc-tag">Sin gluten</span>
+      </div>
+    </div>
+    <div class="section-title">Populares hoy</div>
+    <div class="recetas-scroll">
+      <div class="mini-card" onclick="abrirReceta(0)">
+        <div class="mc-emoji">🥗</div>
+        <div class="mc-body"><div class="mc-name">Ensalada mediterránea</div><div class="mc-tag">Almuerzo · 210 kcal</div></div>
+      </div>
+      <div class="mini-card" onclick="abrirReceta(1)">
+        <div class="mc-emoji">🍳</div>
+        <div class="mc-body"><div class="mc-name">Revuelto de espinaca</div><div class="mc-tag">Desayuno · 180 kcal</div></div>
+      </div>
+      <div class="mini-card" onclick="abrirReceta(2)">
+        <div class="mc-emoji">🍲</div>
+        <div class="mc-body"><div class="mc-name">Sopa de lentejas</div><div class="mc-tag">Cena · 240 kcal</div></div>
+      </div>
+      <div class="mini-card" onclick="abrirReceta(3)">
+        <div class="mc-emoji">🫐</div>
+        <div class="mc-body"><div class="mc-name">Bowl de frutas y semillas</div><div class="mc-tag">Merienda · 150 kcal</div></div>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+    <nav class="nav-bottom">
+      <button class="nav-btn active" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
+      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+    </nav>
+  </div>
+
+  <!-- RECETAS -->
+  <div id="screen-recetas" class="screen">
+    <div class="recetas-header">
+      <h2>Recetas</h2>
+      <div class="filtros">
+        <button class="filtro-btn active" onclick="filtrar(this,'todos')">Todas</button>
+        <button class="filtro-btn" onclick="filtrar(this,'desayuno')">🌅 Desayuno</button>
+        <button class="filtro-btn" onclick="filtrar(this,'almuerzo')">☀️ Almuerzo</button>
+        <button class="filtro-btn" onclick="filtrar(this,'merienda')">🍵 Merienda</button>
+        <button class="filtro-btn" onclick="filtrar(this,'cena')">🌙 Cena</button>
+      </div>
+    </div>
+    <div class="receta-lista" id="receta-lista"></div>
+    <nav class="nav-bottom">
+      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+      <button class="nav-btn active" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
+      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+    </nav>
+  </div>
+
+  <!-- DETALLE RECETA -->
+  <div id="screen-detalle" class="screen">
+    <div class="det-header">
+      <div class="det-emoji-bg" id="det-emoji">🥗</div>
+      <button class="det-back" onclick="goTo('recetas')">←</button>
+    </div>
+    <div class="det-body" id="det-body"></div>
+  </div>
+
+  <!-- MENU SEMANAL -->
+  <div id="screen-menu" class="screen">
+    <div class="menu-header">
+      <h2>Menú semanal</h2>
+      <p>Semana del <span id="semana-label"></span></p>
+    </div>
+    <div id="menu-dias"></div>
+    <button class="compras-btn" onclick="mostrarCompras()">🛒 Ver lista de compras</button>
+    <div style="height:20px"></div>
+    <nav class="nav-bottom">
+      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+      <button class="nav-btn active" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
+      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+    </nav>
+  </div>
+
+  <!-- CALCULADORA -->
+  <div id="screen-calc" class="screen">
+    <div class="calc-header"><h2>Calculadora de calorías</h2></div>
+    <div class="calc-body">
+      <div class="slider-field">
+        <label>Peso (kg) <span id="val-peso">65</span> kg</label>
+        <input type="range" min="40" max="130" value="65" step="1" oninput="calcular()" id="sl-peso">
+      </div>
+      <div class="slider-field">
+        <label>Altura (cm) <span id="val-altura">165</span> cm</label>
+        <input type="range" min="140" max="200" value="165" step="1" oninput="calcular()" id="sl-altura">
+      </div>
+      <div class="slider-field">
+        <label>Edad <span id="val-edad">35</span> años</label>
+        <input type="range" min="18" max="80" value="35" step="1" oninput="calcular()" id="sl-edad">
+      </div>
+      <div class="field" style="margin-bottom:20px">
+        <label>Nivel de actividad</label>
+        <div class="option-grid">
+          <div class="option-card selected" onclick="selectOption(this,'act2','sedentaria');calcular()" data-group="act2" data-val="sedentaria" style="padding:10px">
+            <div class="oc-icon" style="font-size:18px">🛋️</div>
+            <div class="oc-label" style="font-size:12px">Sedentaria</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'act2','leve');calcular()" data-group="act2" data-val="leve" style="padding:10px">
+            <div class="oc-icon" style="font-size:18px">🚶</div>
+            <div class="oc-label" style="font-size:12px">Leve</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'act2','moderada');calcular()" data-group="act2" data-val="moderada" style="padding:10px">
+            <div class="oc-icon" style="font-size:18px">🏃</div>
+            <div class="oc-label" style="font-size:12px">Moderada</div>
+          </div>
+          <div class="option-card" onclick="selectOption(this,'act2','intensa');calcular()" data-group="act2" data-val="intensa" style="padding:10px">
+            <div class="oc-icon" style="font-size:18px">🏋️</div>
+            <div class="oc-label" style="font-size:12px">Intensa</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-big">
+        <div class="rb-num"><span id="result-cals">1.965</span></div>
+        <div class="rb-label">calorías diarias recomendadas</div>
+      </div>
+      <div class="macros-grid">
+        <div class="macro-card mc-prot"><div class="mv" id="m-prot">147g</div><div class="ml">Proteínas</div></div>
+        <div class="macro-card mc-carb"><div class="mv" id="m-carb">221g</div><div class="ml">Carbohidratos</div></div>
+        <div class="macro-card mc-gras"><div class="mv" id="m-gras">65g</div><div class="ml">Grasas</div></div>
+      </div>
+      <div style="background:var(--verde-light);border-radius:14px;padding:14px;font-size:13px;color:var(--verde-dark);line-height:1.6">
+        💡 <strong>Tip para celíacas:</strong> Priorizá carbohidratos de arroz, maíz, quinoa y papa. Evitá todo producto con trigo, avena, cebada o centeno.
+      </div>
+    </div>
+    <nav class="nav-bottom">
+      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+      <button class="nav-btn active" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
+      <button class="nav-btn" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+    </nav>
+  </div>
+
+  <!-- SEGUIMIENTO -->
+  <div id="screen-seguimiento" class="screen">
+    <div class="seg-header">
+      <h2>Seguimiento de salud</h2>
+      <p>Registrá tu peso y glucosa diariamente</p>
+    </div>
+    <div class="seg-body">
+      <div class="registro-form">
+        <h3>Registro de hoy</h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Peso (kg)</label>
+            <input type="number" id="inp-peso" placeholder="65.0" step="0.1">
+          </div>
+          <div class="input-group">
+            <label>Glucosa (mg/dL)</label>
+            <input type="number" id="inp-glucosa" placeholder="95">
+          </div>
+        </div>
+        <button class="btn-guardar" onclick="guardarRegistro()">Guardar registro</button>
+      </div>
+
+      <div class="chart-container">
+        <h3>Glucosa últimos 7 días</h3>
+        <div class="chart-bars" id="glucosa-chart"></div>
+      </div>
+
+      <div class="registros-lista">
+        <h3>Historial</h3>
+        <div id="historial-lista"></div>
+      </div>
+    </div>
+    <nav class="nav-bottom">
+      <button class="nav-btn" onclick="goTo('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</button>
+      <button class="nav-btn" onclick="goTo('recetas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Recetas</button>
+      <button class="nav-btn" onclick="goTo('menu')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Menú</button>
+      <button class="nav-btn" onclick="goTo('calc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="12" y2="18"/></svg>Calcular</button>
+      <button class="nav-btn active" onclick="goTo('seguimiento')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Salud</button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const recetas = [
+  { id:0, nombre:'Ensalada mediterránea', tipo:'almuerzo', emoji:'🥗', cals:210, tiempo:'15 min', ig:'Bajo', tags:['Sin TACC','IG Bajo'], ingredientes:[['Lechuga romana','2 tazas'],['Tomate cherry','100g'],['Pepino','1/2 unidad'],['Aceitunas negras','30g'],['Aceite de oliva','1 cda'],['Limón','1/2 unidad'],['Sal y pimienta','a gusto']], pasos:['Lavá y cortá la lechuga en trozos medianos.','Cortá los tomates cherry por la mitad y el pepino en rodajas finas.','Mezclá todos los vegetales en un bol grande.','Agregá las aceitunas, el aceite de oliva y el jugo de limón.','Condimentá con sal y pimienta. Serví frío.'] },
+  { id:1, nombre:'Revuelto de espinaca y huevo', tipo:'desayuno', emoji:'🍳', cals:180, tiempo:'10 min', ig:'Bajo', tags:['Sin TACC','IG Bajo','Alto en proteínas'], ingredientes:[['Huevos','2 unidades'],['Espinaca fresca','1 taza'],['Ajo','1 diente'],['Aceite de oliva','1 cdita'],['Sal','a gusto']], pasos:['Calentá el aceite en una sartén a fuego medio.','Sofreí el ajo picado por 1 minuto.','Agregá la espinaca y cociná hasta que reduzca.','Batí los huevos, vertalos sobre la espinaca y revolvé suavemente.','Condimentá y serví caliente.'] },
+  { id:2, nombre:'Sopa de lentejas', tipo:'cena', emoji:'🍲', cals:240, tiempo:'40 min', ig:'Bajo-medio', tags:['Sin TACC','Alto en fibra'], ingredientes:[['Lentejas','1 taza'],['Zanahoria','1 grande'],['Cebolla','1/2 unidad'],['Tomate','1 unidad'],['Caldo vegetal sin TACC','500ml'],['Comino','1 cdita'],['Sal','a gusto']], pasos:['Remojá las lentejas 30 minutos antes. Escurrí.','En una olla, sofreí la cebolla y zanahoria picadas por 5 minutos.','Agregá el tomate picado y el comino. Cociná 3 minutos.','Sumá las lentejas y el caldo. Lleví a hervor.','Bajá el fuego y cociná 25 minutos hasta que estén tiernas. Condimentá.'] },
+  { id:3, nombre:'Bowl de frutas y semillas', tipo:'merienda', emoji:'🫐', cals:150, tiempo:'5 min', ig:'Medio', tags:['Sin TACC','Natural'], ingredientes:[['Banana','1 unidad'],['Frutillas','100g'],['Semillas de chía','1 cda'],['Semillas de girasol','1 cda'],['Miel (opcional)','1 cdita']], pasos:['Cortá la banana en rodajas y las frutillas en mitades.','Colocá las frutas en un bol.','Esparcí las semillas de chía y girasol por encima.','Si querés más dulzor, agregá un chorrito de miel.','Serví de inmediato o guardá en la heladera.'] },
+  { id:4, nombre:'Tarta de verduras sin TACC', tipo:'almuerzo', emoji:'🥧', cals:280, tiempo:'35 min', ig:'Bajo', tags:['Sin TACC','IG Bajo'], ingredientes:[['Harina de arroz','200g'],['Huevo','3 unidades'],['Zapallito','2 unidades'],['Cebolla','1 unidad'],['Queso untable descremado','100g'],['Aceite','2 cdas'],['Sal y pimienta','a gusto']], pasos:['Mezclá la harina de arroz con 2 huevos y aceite para la masa.','Estirá la masa y colocala en un molde enmantecado.','Sofreí la cebolla y el zapallito rallado.','Batí el huevo restante con el queso untable y mezclá con las verduras.','Volcá el relleno sobre la masa y cociná 25 min a 180°C.'] },
+  { id:5, nombre:'Porridge de avena sin gluten', tipo:'desayuno', emoji:'🥣', cals:220, tiempo:'8 min', ig:'Bajo', tags:['Sin TACC','Sin gluten'], ingredientes:[['Avena certificada sin TACC','1/2 taza'],['Leche descremada','1 taza'],['Canela','1/2 cdita'],['Banana','1/2 unidad'],['Nueces','20g']], pasos:['En una olla, mezcla la avena con la leche.','Cociná a fuego medio revolviendo constantemente por 5 minutos.','Agregá la canela y una pizca de sal.','Serví en un bol y decorá con banana en rodajas y nueces.','Podés endulzar con stevia si lo preferís.'] },
+  { id:6, nombre:'Pollo al limón con arroz', tipo:'cena', emoji:'🍗', cals:320, tiempo:'30 min', ig:'Bajo-medio', tags:['Sin TACC','Alto en proteínas'], ingredientes:[['Pechuga de pollo','200g'],['Arroz integral','1/2 taza'],['Limón','1 unidad'],['Ajo','2 dientes'],['Romero','a gusto'],['Aceite de oliva','1 cda']], pasos:['Marinare el pollo con jugo de limón, ajo y romero por 15 minutos.','Cociná el arroz integral según indicaciones del paquete.','En sartén caliente con aceite, sellá el pollo 4 minutos por lado.','Bajá el fuego y cociná 10 minutos más con tapa.','Serví sobre el arroz con rodajas de limón.'] },
+  { id:7, nombre:'Licuado verde antioxidante', tipo:'merienda', emoji:'🥤', cals:120, tiempo:'5 min', ig:'Bajo', tags:['Sin TACC','IG Bajo','Detox'], ingredientes:[['Espinaca baby','1 taza'],['Pepino','1/2 unidad'],['Manzana verde','1 unidad'],['Jengibre','1 cm'],['Agua','200ml'],['Hielo','a gusto']], pasos:['Lavá bien todos los vegetales y la fruta.','Cortá la manzana en trozos retirando las semillas.','Colocá todo en la licuadora.','Agregá el agua y el hielo.','Procesá hasta obtener una mezcla homogénea. Serví frío.'] },
+];
+
+const menuSemanal = [
+  { dia:'Lunes', desayuno:'Porridge de avena sin gluten', almuerzo:'Ensalada mediterránea', merienda:'Bowl de frutas y semillas', cena:'Sopa de lentejas' },
+  { dia:'Martes', desayuno:'Revuelto de espinaca y huevo', almuerzo:'Tarta de verduras sin TACC', merienda:'Licuado verde antioxidante', cena:'Pollo al limón con arroz' },
+  { dia:'Miércoles', desayuno:'Porridge de avena sin gluten', almuerzo:'Pollo al limón con arroz', merienda:'Bowl de frutas y semillas', cena:'Sopa de lentejas' },
+  { dia:'Jueves', desayuno:'Revuelto de espinaca y huevo', almuerzo:'Ensalada mediterránea', merienda:'Licuado verde antioxidante', cena:'Tarta de verduras sin TACC' },
+  { dia:'Viernes', desayuno:'Porridge de avena sin gluten', almuerzo:'Tarta de verduras sin TACC', merienda:'Bowl de frutas y semillas', cena:'Pollo al limón con arroz' },
+  { dia:'Sábado', desayuno:'Revuelto de espinaca y huevo', almuerzo:'Sopa de lentejas', merienda:'Licuado verde antioxidante', cena:'Ensalada mediterránea' },
+  { dia:'Domingo', desayuno:'Porridge de avena sin gluten', almuerzo:'Pollo al limón con arroz', merienda:'Bowl de frutas y semillas', cena:'Sopa de lentejas' },
+];
+
+const compras = ['Lechuga romana','Tomate cherry','Pepino x3','Aceitunas negras','Espinaca fresca x2','Huevos (docena)','Lentejas (500g)','Zanahoria x2','Cebolla x2','Frutillas','Banana x3','Semillas de chía','Semillas de girasol','Avena certificada sin TACC','Arroz integral','Pechuga de pollo','Harina de arroz','Queso untable descremado','Limón x3','Zapallito x2','Aceite de oliva','Manzana verde x2'];
+
+let perfil = { nombre: '', condicion: 'celiaca', actividad: 'sedentaria' };
+let registros = [
+  { fecha:'02/06', peso:64.5, glucosa:92 },
+  { fecha:'03/06', peso:64.3, glucosa:88 },
+  { fecha:'04/06', peso:64.4, glucosa:95 },
+  { fecha:'05/06', peso:64.2, glucosa:90 },
+];
+let filtroActivo = 'todos';
+
+function nextStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+}
+
+function selectOption(el, group, val) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  if(group==='cond') perfil.condicion = val;
+  if(group==='act') perfil.actividad = val;
+}
+
+function finishOnboarding() {
+  const nombre = document.getElementById('input-nombre').value.trim() || 'Amiga';
+  perfil.nombre = nombre;
+  document.getElementById('nombre-display').textContent = nombre;
+  document.getElementById('avatar-display').textContent = nombre[0].toUpperCase();
+  const ahora = new Date();
+  document.getElementById('fecha-display').textContent = ahora.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
+  const dias = ['dom','lun','mar','mié','jue','vie','sáb'];
+  const hoy = ahora.getDay();
+  const lunes = new Date(ahora); lunes.setDate(ahora.getDate() - ((hoy+6)%7));
+  document.getElementById('semana-label').textContent = lunes.toLocaleDateString('es-AR',{day:'numeric',month:'long'});
+  renderRecetas('todos');
+  renderMenu();
+  renderHistorial();
+  renderChart();
+  calcular();
+  goTo('home');
+}
+
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+}
+
+function filtrar(btn, tipo) {
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filtroActivo = tipo;
+  renderRecetas(tipo);
+}
+
+function renderRecetas(tipo) {
+  const lista = document.getElementById('receta-lista');
+  const filtradas = tipo === 'todos' ? recetas : recetas.filter(r => r.tipo === tipo);
+  lista.innerHTML = filtradas.map(r => `
+    <div class="receta-item" onclick="abrirReceta(${r.id})">
+      <div class="receta-emoji">${r.emoji}</div>
+      <div class="receta-info">
+        <h3>${r.nombre}</h3>
+        <p>🕐 ${r.tiempo} · ${r.cals} kcal · IG ${r.ig}</p>
+        <div class="receta-tags">
+          ${r.tags.map(t => `<span class="tag tag-verde">${t}</span>`).join('')}
+          <span class="tag tag-azul">${r.tipo.charAt(0).toUpperCase()+r.tipo.slice(1)}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function abrirReceta(id) {
+  const r = recetas[id];
+  document.getElementById('det-emoji').textContent = r.emoji;
+  document.getElementById('det-body').innerHTML = `
+    <h2>${r.nombre}</h2>
+    <div class="det-meta">
+      ${r.tags.map(t=>`<span class="tag tag-verde">${t}</span>`).join('')}
+      <span class="tag tag-naranja">${r.tipo.charAt(0).toUpperCase()+r.tipo.slice(1)}</span>
+    </div>
+    <div class="det-nums">
+      <div class="det-num"><div class="dn-val">${r.cals}</div><div class="dn-label">kcal</div></div>
+      <div class="det-num"><div class="dn-val">${r.tiempo}</div><div class="dn-label">tiempo</div></div>
+      <div class="det-num"><div class="dn-val">IG ${r.ig}</div><div class="dn-label">glucémico</div></div>
+    </div>
+    <div class="det-section">
+      <h3>🛒 Ingredientes</h3>
+      <ul class="ingr-list">
+        ${r.ingredientes.map(i=>`<li>${i[0]}<span>${i[1]}</span></li>`).join('')}
+      </ul>
+    </div>
+    <div class="det-section">
+      <h3>👩‍🍳 Preparación</h3>
+      ${r.pasos.map((p,i)=>`<div class="paso"><div class="paso-num">${i+1}</div><p>${p}</p></div>`).join('')}
+    </div>
+  `;
+  goTo('detalle');
+}
+
+function renderMenu() {
+  const emojis = { desayuno:'🌅', almuerzo:'☀️', merienda:'🍵', cena:'🌙' };
+  document.getElementById('menu-dias').innerHTML = menuSemanal.map(d => `
+    <div class="dia-card">
+      <div class="dia-header">
+        <h3>${d.dia}</h3>
+        <span>4 comidas · ~1.050 kcal</span>
+      </div>
+      <div class="dia-body">
+        ${['desayuno','almuerzo','merienda','cena'].map(c=>`
+          <div class="comida-row">
+            <div class="comida-emoji">${emojis[c]}</div>
+            <div class="comida-info">
+              <div class="ci-tipo">${c.charAt(0).toUpperCase()+c.slice(1)}</div>
+              <div class="ci-nom">${d[c]}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function mostrarCompras() {
+  const lista = compras.map(i=>`• ${i}`).join('\n');
+  alert('🛒 Lista de compras semanal:\n\n'+lista);
+}
+
+function calcular() {
+  const peso = parseInt(document.getElementById('sl-peso').value);
+  const altura = parseInt(document.getElementById('sl-altura').value);
+  const edad = parseInt(document.getElementById('sl-edad').value);
+  document.getElementById('val-peso').textContent = peso;
+  document.getElementById('val-altura').textContent = altura;
+  document.getElementById('val-edad').textContent = edad;
+  const tmb = 447.6 + (9.25*peso) + (3.1*altura) - (4.33*edad);
+  const factores = { sedentaria:1.2, leve:1.375, moderada:1.55, intensa:1.725 };
+  const actSel = document.querySelector('[data-group="act2"].selected');
+  const factor = factores[actSel ? actSel.dataset.val : 'sedentaria'];
+  const tdee = Math.round(tmb * factor);
+  document.getElementById('result-cals').textContent = tdee.toLocaleString('es-AR');
+  document.getElementById('m-prot').textContent = Math.round(tdee*0.30/4)+'g';
+  document.getElementById('m-carb').textContent = Math.round(tdee*0.45/4)+'g';
+  document.getElementById('m-gras').textContent = Math.round(tdee*0.25/9)+'g';
+  document.getElementById('cals-stat').textContent = (tdee/1000).toFixed(1).replace('.',',')+' k';
+}
+
+function guardarRegistro() {
+  const peso = document.getElementById('inp-peso').value;
+  const glucosa = document.getElementById('inp-glucosa').value;
+  if(!peso && !glucosa) { showToast('Ingresá al menos un valor'); return; }
+  const hoy = new Date();
+  const fecha = hoy.getDate().toString().padStart(2,'0')+'/'+(hoy.getMonth()+1).toString().padStart(2,'0');
+  registros.unshift({ fecha, peso: peso||'—', glucosa: glucosa||'—' });
+  document.getElementById('inp-peso').value = '';
+  document.getElementById('inp-glucosa').value = '';
+  renderHistorial();
+  renderChart();
+  showToast('✅ Registro guardado');
+}
+
+function renderHistorial() {
+  document.getElementById('historial-lista').innerHTML = registros.slice(0,7).map(r => {
+    const g = parseFloat(r.glucosa);
+    const cls = isNaN(g) ? '' : g < 100 ? 'bueno' : g < 126 ? 'medio' : 'malo';
+    return `
+      <div class="reg-item">
+        <span class="ri-fecha">${r.fecha}</span>
+        <div class="ri-vals">
+          <div class="reg-val"><div class="rv-num">${r.peso}</div><div class="rv-label">kg</div></div>
+          <div class="reg-val"><div class="rv-num ${cls}">${r.glucosa}</div><div class="rv-label">mg/dL</div></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderChart() {
+  const datos = registros.slice(0,7).reverse();
+  const max = Math.max(...datos.map(d=>parseFloat(d.glucosa)||0), 140);
+  document.getElementById('glucosa-chart').innerHTML = datos.map(d => {
+    const g = parseFloat(d.glucosa)||0;
+    const h = Math.round((g/max)*70);
+    const color = g < 100 ? '#1a9e6e' : g < 126 ? '#f0893a' : '#e05252';
+    return `<div class="bar-wrap"><div class="bar" style="height:${h}px;background:${color}"></div><div class="bar-label">${d.fecha}</div></div>`;
+  }).join('');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
